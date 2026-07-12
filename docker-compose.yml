@@ -1,0 +1,95 @@
+version: "3.9"
+
+services:
+  # ---------------------------------------------------------
+  # PostgreSQL - main database for intern data
+  # ---------------------------------------------------------
+  postgres:
+    image: postgres:16
+    container_name: intern_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: intern_admin
+      POSTGRES_PASSWORD: intern_pass123
+      POSTGRES_DB: intern_analytics
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U intern_admin -d intern_analytics"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------
+  # Redis - caching layer (predictions, sessions)
+  # ---------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: intern_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------------------------
+  # MLflow - experiment tracking & model registry
+  # ---------------------------------------------------------
+  mlflow:
+    image: python:3.12-slim
+    container_name: intern_mlflow
+    restart: unless-stopped
+    working_dir: /mlflow
+    ports:
+      - "5000:5000"
+    volumes:
+      - mlflow_data:/mlflow
+    command: >
+      bash -c "pip install --no-cache-dir mlflow psycopg2-binary &&
+      mlflow server
+      --backend-store-uri sqlite:///mlflow/mlflow.db
+      --default-artifact-root /mlflow/artifacts
+      --host 0.0.0.0
+      --port 5000"
+
+  # ---------------------------------------------------------
+  # Prometheus - metrics collection (model monitoring)
+  # ---------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: intern_prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+
+  # ---------------------------------------------------------
+  # Grafana - monitoring dashboards
+  # ---------------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: intern_grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin123
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres_data:
+  mlflow_data:
+  grafana_data:
