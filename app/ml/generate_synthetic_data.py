@@ -41,15 +41,26 @@ FIRST_NAMES = ["Ali", "Sara", "Ahmed", "Ayesha", "Bilal", "Fatima", "Hamza", "Za
 LAST_NAMES = ["Khan", "Ahmed", "Malik", "Sheikh", "Butt", "Raza", "Qureshi", "Iqbal",
               "Hussain", "Chaudhry"]
 
-NUM_INTERNS = 250
+NUM_INTERNS = 800
 INTERNSHIP_LENGTH_DAYS = 90  # ~3 months
+
+# Probability an intern in each profile actually drops out.
+# NOTE: not 100%/0% on purpose - real at-risk interns don't always drop out,
+# and occasionally a "strong" intern leaves for unrelated reasons. This
+# overlap is what makes the label learnable-but-not-trivial, which is what
+# you want for a believable, defensible model (not suspiciously perfect).
+DROPOUT_PROBABILITY = {
+    "at_risk": 0.55,
+    "average": 0.12,
+    "strong": 0.03,
+}
 
 
 def random_name():
     return f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
 
 
-def create_mentors(db: Session, count: int = 12):
+def create_mentors(db: Session, count: int = 30):
     mentors = []
     for i in range(count):
         m = Mentor(
@@ -103,6 +114,18 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
     commits_per_day = random.uniform(*ranges["commits_per_day"])
     review_score_base = random.uniform(*ranges["review_score"])
     mentor_rating_base = random.uniform(*ranges["mentor_rating"])
+
+    # --- Inject realistic noise/overlap (10% chance of a "surprise" outcome) ---
+    # This prevents classes from being perfectly separable, which would make
+    # your model look suspiciously perfect (e.g. 99%+ accuracy) instead of
+    # realistically good (e.g. 80-90%).
+    if random.random() < 0.10:
+        attendance_rate = min(1.0, max(0.0, attendance_rate + random.uniform(-0.20, 0.20)))
+        completion_rate = min(1.0, max(0.0, completion_rate + random.uniform(-0.20, 0.20)))
+        commits_per_day = max(0.0, commits_per_day + random.uniform(-1.5, 1.5))
+
+    # Decide the ACTUAL outcome (this becomes intern.status, your real label)
+    will_dropout = random.random() < DROPOUT_PROBABILITY[profile]
 
     start = intern.start_date
     days_elapsed = min(INTERNSHIP_LENGTH_DAYS, (date.today() - start).days)
@@ -192,7 +215,7 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
             meetings_attended=1 if random.random() < attendance_rate else 0,
         ))
 
-    return profile
+    return profile, will_dropout
 
 
 def main():
@@ -205,6 +228,7 @@ def main():
 
     print(f"Creating {NUM_INTERNS} interns and their activity data...")
     profile_counts = {"at_risk": 0, "average": 0, "strong": 0}
+    status_counts = {"dropped": 0, "completed": 0, "active": 0}
 
     for i in range(NUM_INTERNS):
         start_date = date.today() - timedelta(days=random.randint(10, INTERNSHIP_LENGTH_DAYS))
@@ -216,16 +240,27 @@ def main():
             batch=random.choice(BATCHES),
             start_date=start_date,
             expected_end_date=start_date + timedelta(days=INTERNSHIP_LENGTH_DAYS),
-            status="active",
+            status="active",  # temporary, updated below once outcome is known
         )
         db.add(intern)
         db.commit()
         db.refresh(intern)
 
-        profile = generate_for_intern(db, intern, mentor_ids)
+        profile, will_dropout = generate_for_intern(db, intern, mentor_ids)
         profile_counts[profile] += 1
 
-        if (i + 1) % 50 == 0:
+        # Decide final status: dropped, completed (internship finished, stayed),
+        # or still active (internship still in progress)
+        days_since_start = (date.today() - start_date).days
+        if will_dropout:
+            intern.status = "dropped"
+        elif days_since_start >= INTERNSHIP_LENGTH_DAYS:
+            intern.status = "completed"
+        else:
+            intern.status = "active"
+        status_counts[intern.status] += 1
+
+        if (i + 1) % 100 == 0:
             db.commit()
             print(f"  ...{i + 1}/{NUM_INTERNS} interns generated")
 
@@ -233,7 +268,8 @@ def main():
     db.close()
 
     print("\nDone.")
-    print(f"Profile distribution: {profile_counts}")
+    print(f"Profile distribution (hidden ground truth): {profile_counts}")
+    print(f"Status distribution (your actual training label): {status_counts}")
     print("Synthetic dataset generated successfully.")
 
 
