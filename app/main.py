@@ -4,13 +4,13 @@ Prediction & Risk Analytics Platform (Ezitech Case Study AI-005)
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import Base, engine
-from app.routers import interns, predictions, recommendations
+from app.routers import admin, auth, interns, predictions, recommendations
 
-# Creates tables if they don't already exist (schema.sql handles first-run via Docker,
-# this is a safety net for local/dev runs)
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
@@ -27,17 +27,33 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(interns.router)
 app.include_router(predictions.router)
 app.include_router(recommendations.router)
 
-# Exposes /metrics for Prometheus to scrape
 Instrumentator().instrument(app).expose(app)
 
+# --- Static assets (css/js) ------------------------------------------------
+# Served under /static, e.g. /static/css/base.css, /static/js/auth.js
+app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
-@app.get("/", tags=["Health"])
-def root():
-    return {"status": "ok", "service": "intern-analytics-platform"}
+
+# --- Page routes -------------------------------------------------------------
+@app.get("/")
+def serve_root():
+    return FileResponse("app/static/index.html")
+
+
+@app.get("/login")
+def serve_login():
+    return FileResponse("app/static/login.html")
+
+
+@app.get("/admin")
+def serve_admin():
+    return FileResponse("app/static/admin.html")
 
 
 @app.get("/health", tags=["Health"])

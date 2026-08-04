@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin · Ezitech Institute</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> EZITECH</div>
+
+    <a href="/admin" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      Dashboard
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 8.2a3 3 0 1 1 3.6 4.4"/><path d="M15.5 14c2.8.3 5 2.3 5 5.5"/></svg>
+      Interns
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 8 12 3 3 8l9 5 9-5Z"/><path d="M3 8v8l9 5 9-5V8"/><path d="M12 13v8"/></svg>
+      Batches
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M9 8h1M14 8h1M9 12h1M14 12h1M9 16h1M14 16h1"/></svg>
+      Departments
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 9-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg>
+      Technologies
+    </div>
+
+    <div class="nav-section-label">Analytics</div>
+    <a href="/admin" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      Overview
+    </a>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg>
+      Performance
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg>
+      Risk Analysis
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+      Reports
+    </div>
+
+    <div class="nav-section-label">Account</div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a2 2 0 0 0 .4 2.2l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-2.2-.4 2 2 0 0 0-1.2 1.8V20a2 2 0 1 1-4 0v-.2a2 2 0 0 0-1.2-1.8 2 2 0 0 0-2.2.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a2 2 0 0 0 .4-2.2 2 2 0 0 0-1.8-1.2H2a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.8-1.2 2 2 0 0 0-.4-2.2l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a2 2 0 0 0 2.2.4H9a2 2 0 0 0 1.2-1.8V2a2 2 0 1 1 4 0v.2a2 2 0 0 0 1.2 1.8 2 2 0 0 0 2.2-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0-.4 2.2v.1a2 2 0 0 0 1.8 1.2H22a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.8 1.2Z"/></svg>
+      Settings
+    </div>
+
+    <div class="help-card">
+      <h5>Need help?</h5>
+      <p>Ezitech Institute · AI-Powered Internship Performance & Risk Analytics Platform.</p>
+      <a href="mailto:info@ezitech.org">Contact Support</a>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="top-search-bar">
+      <div class="search-input-wrap">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input type="text" id="globalSearch" placeholder="Search by name, technology, batch…">
+      </div>
+      <div class="top-user-area">
+        <button class="bell-btn" id="bellBtn" title="High-risk alerts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+        </button>
+        <div class="user-menu-wrap">
+          <button class="user-menu-trigger" id="userMenuTrigger">
+            <div class="avatar-circle" id="topAvatar" style="background:var(--blue)">A</div>
+            <div class="name-block">
+              <div class="name" id="userName">—</div>
+              <div class="role">Admin</div>
+            </div>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button onclick="logout()">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="page-banner">
+        <p class="eyebrow" id="welcomeLine">Admin</p>
+        <h1>Overall Internship Health</h1>
+        <p>Cohort-wide risk, top performers, and batch/technology comparisons.</p>
+      </div>
+
+      <div class="section-header-row">
+        <div></div>
+        <div class="meta-row">
+          <span id="lastUpdated"></span>
+          <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div id="content">
+        <div class="skeleton-kpi-row">
+          <div class="skeleton-block"></div><div class="skeleton-block"></div>
+          <div class="skeleton-block"></div><div class="skeleton-block"></div>
+        </div>
+        <div class="skeleton-table"><div class="skeleton-block"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script>
+  const AVATAR_COLORS = ["#2F6FED", "#7C5CFC", "#16A34A", "#D97706", "#DC2626", "#0EA5E9"];
+
+  const session = requireSession("admin");
+  let overviewData = null;
+  let highRiskExpanded = false;
+  let topPerformerExpanded = false;
+
+  if (session) {
+    document.getElementById("userName").textContent = session.name;
+    document.getElementById("welcomeLine").textContent = `Welcome back, ${session.name.split(" ")[0]}! 👋`;
+    document.getElementById("topAvatar").textContent = initials(session.name);
+    document.getElementById("topAvatar").style.background = avatarColor(session.name);
+    loadOverview();
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", loadOverview);
+  document.getElementById("globalSearch").addEventListener("input", (e) => {
+    applyGlobalFilter(e.target.value.trim().toLowerCase());
+  });
+
+  const userMenuTrigger = document.getElementById("userMenuTrigger");
+  const userMenuDropdown = document.getElementById("userMenuDropdown");
+  userMenuTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userMenuDropdown.classList.toggle("open");
+  });
+  document.addEventListener("click", () => userMenuDropdown.classList.remove("open"));
+
+  function pct(value) {
+    if (value === null || value === undefined) return "—";
+    return (value * 100).toFixed(1) + "%";
+  }
+
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+
+  function avatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+
+  function nameCell(r) {
+    return `<div class="avatar-cell">
+      <div class="avatar-circle" style="background:${avatarColor(r.name)}">${initials(r.name)}</div>
+      <span>${r.name || "—"}</span>
+    </div>`;
+  }
+
+  function riskPill(value) {
+    if (value === null || value === undefined) return '<span class="pill pill-gray">—</span>';
+    const barClass = value > 0.7 ? "red" : value > 0.4 ? "" : "green";
+    const barColor = value > 0.4 && value <= 0.7 ? "background:var(--amber);" : "";
+    const pillClass = value > 0.7 ? "pill-red" : value > 0.4 ? "pill-amber" : "pill-green";
+    return `<span class="bar-track"><span class="bar-fill ${barClass}" style="width:${Math.min(value*100,100)}%;${barColor}"></span></span><span class="pill ${pillClass}">${pct(value)}</span>`;
+  }
+
+  function successPill(value) {
+    if (value === null || value === undefined) return '<span class="pill pill-gray">—</span>';
+    return `<span class="bar-track"><span class="bar-fill green" style="width:${Math.min(value*100,100)}%"></span></span><span class="pill pill-green">${pct(value)}</span>`;
+  }
+
+  function trendLabel(label) {
+    const map = {
+      improving: '<span class="pill pill-green">▲ Improving</span>',
+      stable: '<span class="pill pill-gray">▬ Stable</span>',
+      declining: '<span class="pill pill-red">▼ Declining</span>',
+    };
+    return map[label] || '<span class="pill pill-gray">—</span>';
+  }
+
+  function renderTable(rows, columns, emptyMessage) {
+    if (!rows.length) {
+      return `<table class="data-table"><thead><tr>${columns.map(c => `<th>${c.label}</th>`).join("")}</tr></thead>
+        <tbody><tr class="empty-row"><td colspan="${columns.length}">${emptyMessage}</td></tr></tbody></table>`;
+    }
+    const head = columns.map(c => `<th>${c.label}</th>`).join("");
+    const body = rows.map(r => `<tr>${columns.map(c => `<td>${c.render ? c.render(r) : (r[c.key] ?? "—")}</td>`).join("")}</tr>`).join("");
+    return `<table class="data-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+
+  let cachedHighRisk = [], cachedTopPerformers = [], highRiskCols, topPerformerCols;
+
+  function renderCappedCard(containerId, allRows, columns, emptyMessage, expandedFlagGetter, toggleFn, title) {
+    const container = document.getElementById(containerId);
+    const expanded = expandedFlagGetter();
+    const visible = expanded ? allRows : allRows.slice(0, 5);
+    const toggleLabel = expanded ? "Show less ↑" : ("View All " + allRows.length + " →");
+    const toggleButtonHtml = allRows.length > 5
+      ? '<div class="view-all-row"><button id="' + containerId + '-toggle">' + toggleLabel + '</button></div>'
+      : "";
+    container.innerHTML = `
+      <div class="card-header">
+        <h4>${title} <span class="sub-count">(${allRows.length} match${allRows.length === 1 ? "" : "es"})</span></h4>
+      </div>
+      <div style="margin-top:12px;">${renderTable(visible, columns, emptyMessage)}</div>
+      ${toggleButtonHtml}
+    `;
+    if (allRows.length > 5) {
+      document.getElementById(`${containerId}-toggle`).addEventListener("click", toggleFn);
+    }
+  }
+
+  function applyGlobalFilter(q) {
+    const filterFn = r => !q || (r.name || "").toLowerCase().includes(q) ||
+      (r.technology || "").toLowerCase().includes(q) || (r.batch || "").toLowerCase().includes(q);
+    renderCappedCard("highRiskContainer", cachedHighRisk.filter(filterFn), highRiskCols,
+      "No students match.", () => highRiskExpanded, toggleHighRisk, "High-Risk Students");
+    renderCappedCard("topPerformerContainer", cachedTopPerformers.filter(filterFn), topPerformerCols,
+      "No students match.", () => topPerformerExpanded, toggleTopPerformer, "Top Performers");
+  }
+
+  function toggleHighRisk() {
+    highRiskExpanded = !highRiskExpanded;
+    applyGlobalFilter(document.getElementById("globalSearch").value.trim().toLowerCase());
+  }
+  function toggleTopPerformer() {
+    topPerformerExpanded = !topPerformerExpanded;
+    applyGlobalFilter(document.getElementById("globalSearch").value.trim().toLowerCase());
+  }
+
+  async function loadOverview() {
+    const refreshBtn = document.getElementById("refreshBtn");
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "↻ Refreshing…";
+    try {
+      const res = await apiFetch("/admin/overview");
+      if (!res.ok) throw new Error("Failed to load dashboard data.");
+      overviewData = await res.json();
+      render(overviewData);
+      document.getElementById("lastUpdated").textContent =
+        "Last updated " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch (err) {
+      console.error("Dashboard load error:", err);
+      document.getElementById("content").innerHTML =
+        `<p class="loading-note">Couldn't load dashboard data: ${err.message}</p>`;
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "↻ Refresh";
+    }
+  }
+
+  function render(data) {
+    const t = data.totals;
+
+    highRiskCols = [
+      { key: "name", label: "Intern", render: nameCell },
+      { key: "technology", label: "Technology" },
+      { key: "batch", label: "Batch" },
+      { key: "dropout_risk", label: "Dropout Risk", render: r => riskPill(r.dropout_risk) },
+      { key: "performance_trend", label: "Trend", render: r => trendLabel(r.performance_trend) },
+    ];
+
+    topPerformerCols = [
+      { key: "name", label: "Intern", render: nameCell },
+      { key: "technology", label: "Technology" },
+      { key: "batch", label: "Batch" },
+      { key: "success_probability", label: "Success Probability", render: r => successPill(r.success_probability) },
+      { key: "performance_trend", label: "Trend", render: r => trendLabel(r.performance_trend) },
+    ];
+
+    const techCols = [
+      { key: "technology", label: "Technology" },
+      { key: "interns", label: "Interns" },
+      { key: "avg_dropout_risk", label: "Avg Dropout Risk", render: r => pct(r.avg_dropout_risk) },
+      { key: "avg_success_probability", label: "Avg Success Prob.", render: r => pct(r.avg_success_probability) },
+    ];
+
+    const batchCols = [
+      { key: "batch", label: "Batch" },
+      { key: "interns", label: "Interns" },
+      { key: "avg_dropout_risk", label: "Avg Dropout Risk", render: r => pct(r.avg_dropout_risk) },
+      { key: "avg_success_probability", label: "Avg Success Prob.", render: r => pct(r.avg_success_probability) },
+      { key: "dropped", label: "Dropped", render: r => r.dropped > 0
+          ? `<span class="pill pill-red">${r.dropped}</span>`
+          : `<span class="pill pill-gray">0</span>` },
+    ];
+
+    cachedHighRisk = data.high_risk;
+    cachedTopPerformers = data.top_performers;
+
+    const bellBadge = document.getElementById("bellBadge");
+    if (data.high_risk.length > 0) {
+      bellBadge.style.display = "flex";
+      bellBadge.textContent = data.high_risk.length > 99 ? "99+" : data.high_risk.length;
+    } else {
+      bellBadge.style.display = "none";
+    }
+
+    document.getElementById("content").innerHTML = `
+      <div class="kpi-row">
+        <div class="kpi-card animate-in">
+          <div class="icon-row"><div class="label">Total Interns</div>
+            <div class="icon-badge-circle purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 8.2a3 3 0 1 1 3.6 4.4"/><path d="M15.5 14c2.8.3 5 2.3 5 5.5"/></svg></div>
+          </div>
+          <div class="value">${t.total}</div>
+          <div class="caption">across all technologies</div>
+        </div>
+        <div class="kpi-card green animate-in">
+          <div class="icon-row"><div class="label">Active</div>
+            <div class="icon-badge-circle green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg></div>
+          </div>
+          <div class="value">${t.active}</div>
+          <div class="caption">currently in progress</div>
+        </div>
+        <div class="kpi-card animate-in">
+          <div class="icon-row"><div class="label">Completed</div>
+            <div class="icon-badge-circle blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 9 12 5l9 4-9 4-9-4Z"/><path d="M7 11v4c0 1.2 2.2 2.5 5 2.5s5-1.3 5-2.5v-4"/></svg></div>
+          </div>
+          <div class="value">${t.completed}</div>
+          <div class="caption">finished the program</div>
+        </div>
+        <div class="kpi-card red animate-in">
+          <div class="icon-row"><div class="label">Dropped</div>
+            <div class="icon-badge-circle red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg></div>
+          </div>
+          <div class="value">${t.dropped}</div>
+          <div class="caption">did not complete</div>
+        </div>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card amber spark-card animate-in">
+          <div class="icon-row"><div class="label">Avg Dropout Risk</div>
+            <div class="icon-badge-circle amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h6l4 8 4-12 4 6"/></svg></div>
+          </div>
+          <div class="value">${pct(data.avg_dropout_risk)}</div>
+          <div style="margin-top:8px; height:40px;"><canvas id="riskSpark"></canvas></div>
+        </div>
+        <div class="kpi-card green spark-card animate-in">
+          <div class="icon-row"><div class="label">Avg Success Probability</div>
+            <div class="icon-badge-circle green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-9"/><path d="M15 6h6v6"/></svg></div>
+          </div>
+          <div class="value">${pct(data.avg_success_probability)}</div>
+          <div style="margin-top:8px; height:40px;"><canvas id="successSpark"></canvas></div>
+        </div>
+      </div>
+
+      <div class="section-title"><span class="dot"></span> Cohort Status</div>
+      <div class="two-col">
+        <div class="chart-card"><div style="height:220px;"><canvas id="statusChart"></canvas></div></div>
+        <div class="chart-card" style="display:flex; flex-direction:column; justify-content:center;">
+          <div id="statusLegend" class="donut-legend"></div>
+          <div style="margin-top:16px; padding-top:12px; border-top:1px solid var(--border); display:flex; justify-content:space-between; font-weight:700;">
+            <span>Total Interns</span><span>${t.total}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-title"><span class="dot"></span> Department Analytics</div>
+      <div class="two-col">
+        <div class="data-card">${renderTable(data.by_technology, techCols, "No technology data available.")}</div>
+        <div class="chart-card" style="position:relative;">
+          <div style="display:flex; justify-content:flex-end; margin-bottom:8px;"><span class="period-label">All Time</span></div>
+          <div style="height:220px;"><canvas id="techChart"></canvas></div>
+        </div>
+      </div>
+
+      <div class="two-col" style="margin-top:24px;">
+        <div class="card-with-header" id="highRiskContainer"></div>
+        <div class="card-with-header" id="topPerformerContainer"></div>
+      </div>
+
+      <div class="section-title"><span class="dot"></span> Batch Comparison</div>
+      <div class="data-card">${renderTable(data.by_batch, batchCols, "No batch data available.")}</div>
+    `;
+
+    applyGlobalFilter("");
+    renderStatusChart(t);
+    renderTechChart(data.by_technology);
+    renderSparkline("riskSpark", data.dropout_risk_distribution, "#D97706");
+    renderSparkline("successSpark", data.success_probability_distribution, "#16A34A");
+  }
+
+  let statusChartInstance = null;
+  function renderStatusChart(totals) {
+    const ctx = document.getElementById("statusChart");
+    const legendEl = document.getElementById("statusLegend");
+    const labels = ["Active", "Completed", "Dropped"];
+    const values = [totals.active, totals.completed, totals.dropped];
+    const colors = ["#16A34A", "#2F6FED", "#DC2626"];
+
+    if (statusChartInstance) statusChartInstance.destroy();
+    statusChartInstance = new Chart(ctx, {
+      type: "doughnut",
+      data: { labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+      options: { responsive: true, maintainAspectRatio: false, cutout: "68%", plugins: { legend: { display: false } } },
+    });
+
+    legendEl.innerHTML = labels.map((l, i) => `
+      <div class="donut-legend-item">
+        <span class="swatch" style="background:${colors[i]}"></span>
+        ${l} <span class="count">${values[i]}</span>
+      </div>
+    `).join("");
+  }
+
+  let techChartInstance = null;
+  function renderTechChart(techStats) {
+    const ctx = document.getElementById("techChart");
+    if (!ctx || !techStats.length) return;
+    if (techChartInstance) techChartInstance.destroy();
+    techChartInstance = new Chart(ctx, {
+      type: "bar",
+      data: {
+        labels: techStats.map(t => t.technology),
+        datasets: [{
+          label: "Avg Dropout Risk",
+          data: techStats.map(t => t.avg_dropout_risk ? +(t.avg_dropout_risk * 100).toFixed(1) : 0),
+          backgroundColor: "#2F6FED", borderRadius: 6, maxBarThickness: 34,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { callback: v => v + "%" } } },
+      },
+    });
+  }
+
+  const sparkInstances = {};
+  /** Real sparkline: the actual sorted distribution of a metric across the cohort. */
+  function renderSparkline(canvasId, values, color) {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    if (sparkInstances[canvasId]) { sparkInstances[canvasId].destroy(); sparkInstances[canvasId] = null; }
+    if (!values || values.length < 2) return; // need at least 2 points for a line
+    sparkInstances[canvasId] = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: values.map((_, i) => i),
+        datasets: [{
+          data: values.map(v => v * 100),
+          borderColor: color, borderWidth: 2, pointRadius: 0,
+          fill: true, backgroundColor: color + "22", tension: 0.3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { enabled: false } },
+        scales: { x: { display: false }, y: { display: false } },
+      },
+    });
+  }
+</script>
+</body>
+</html>

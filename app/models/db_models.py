@@ -17,6 +17,7 @@ class Mentor(Base):
     name = Column(String(100), nullable=False)
     technology = Column(String(50))
     email = Column(String(100), unique=True)
+    max_capacity = Column(Integer, default=8)
 
     interns = relationship("Intern", back_populates="mentor")
 
@@ -123,4 +124,19 @@ class Recommendation(Base):
     intern_id = Column(Integer, ForeignKey("interns.intern_id"))
     recommendation_type = Column(String(50))
     message = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+# Add this class to app/models/db_models.py (anywhere after Mentor/Intern
+# are defined, since it references both).
+
+class User(Base):
+    __tablename__ = "users"
+
+    user_id = Column(Integer, primary_key=True, index=True)
+    email = Column(String(100), unique=True, nullable=False)
+    password_hash = Column(String(255), nullable=False)
+    role = Column(String(20), nullable=False)  # 'admin', 'mentor', 'student'
+    mentor_id = Column(Integer, ForeignKey("mentors.mentor_id"), nullable=True)
+    intern_id = Column(Integer, ForeignKey("interns.intern_id"), nullable=True)
+    is_active = Column(Boolean, default=True)
     created_at = Column(TIMESTAMP, server_default=func.now())

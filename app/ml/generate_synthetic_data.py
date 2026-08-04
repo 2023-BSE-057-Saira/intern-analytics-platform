@@ -55,6 +55,47 @@ DROPOUT_PROBABILITY = {
     "strong": 0.03,
 }
 
+# --- Trajectory: a REAL behavioral trend over time (not just review scores) ---
+# Each intern gets a trajectory - improving, stable, or declining - which
+# actually drifts their attendance and task completion probability across
+# the internship, not just their review scores. This is what makes
+# Performance Trend and Learning Speed learn a genuine signal rather than
+# statistical noise from a constant probability.
+TRAJECTORY_PROBABILITIES = {
+    "at_risk":  {"declining": 0.55, "stable": 0.30, "improving": 0.15},
+    "average":  {"declining": 0.25, "stable": 0.40, "improving": 0.35},
+    "strong":   {"declining": 0.10, "stable": 0.25, "improving": 0.65},
+}
+
+# How much attendance/completion probability drifts from start to end of
+# the internship. Centered on 0 so the drawn "base rate" still represents
+# roughly the intern's average over the whole period.
+TRAJECTORY_DRIFT_RANGE = {
+    "improving": (0.10, 0.25),
+    "stable": (-0.05, 0.05),
+    "declining": (-0.25, -0.10),
+}
+
+# Trajectory adjusts dropout probability on top of the profile-based base
+# rate - a declining intern is more likely to actually drop out, an
+# improving one less likely, even within the same starting profile.
+TRAJECTORY_DROPOUT_MULTIPLIER = {
+    "improving": 0.6,
+    "stable": 1.0,
+    "declining": 1.4,
+}
+
+
+def generate_trajectory(profile: str) -> str:
+    probs = TRAJECTORY_PROBABILITIES[profile]
+    roll = random.random()
+    cumulative = 0.0
+    for trajectory, p in probs.items():
+        cumulative += p
+        if roll < cumulative:
+            return trajectory
+    return "stable"  # fallback, shouldn't normally hit this
+
 
 def random_name():
     return f"{random.choice(FIRST_NAMES)} {random.choice(LAST_NAMES)}"
@@ -67,6 +108,7 @@ def create_mentors(db: Session, count: int = 30):
             name=random_name(),
             technology=random.choice(TECHNOLOGIES),
             email=f"mentor{i+1}@ezitech.com",
+            max_capacity=random.randint(5, 12),
         )
         db.add(m)
         mentors.append(m)
@@ -115,6 +157,11 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
     review_score_base = random.uniform(*ranges["review_score"])
     mentor_rating_base = random.uniform(*ranges["mentor_rating"])
 
+    # --- Trajectory: real behavioral drift over time ---
+    trajectory = generate_trajectory(profile)
+    attendance_drift = random.uniform(*TRAJECTORY_DRIFT_RANGE[trajectory])
+    completion_drift = random.uniform(*TRAJECTORY_DRIFT_RANGE[trajectory])
+
     # --- Inject realistic noise/overlap (10% chance of a "surprise" outcome) ---
     # This prevents classes from being perfectly separable, which would make
     # your model look suspiciously perfect (e.g. 99%+ accuracy) instead of
@@ -124,27 +171,41 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
         completion_rate = min(1.0, max(0.0, completion_rate + random.uniform(-0.20, 0.20)))
         commits_per_day = max(0.0, commits_per_day + random.uniform(-1.5, 1.5))
 
-    # Decide the ACTUAL outcome (this becomes intern.status, your real label)
-    will_dropout = random.random() < DROPOUT_PROBABILITY[profile]
+    # Decide the ACTUAL outcome (this becomes intern.status, your real label).
+    # Trajectory adjusts the base profile probability - declining interns
+    # are more likely to actually drop out than their profile alone implies.
+    adjusted_dropout_prob = min(0.95, DROPOUT_PROBABILITY[profile] * TRAJECTORY_DROPOUT_MULTIPLIER[trajectory])
+    will_dropout = random.random() < adjusted_dropout_prob
 
     start = intern.start_date
     days_elapsed = min(INTERNSHIP_LENGTH_DAYS, (date.today() - start).days)
     days_elapsed = max(days_elapsed, 1)
 
-    # --- Attendance ---
+    # --- Attendance (with real drift over time) ---
     for d in range(days_elapsed):
         day = start + timedelta(days=d)
         if day.weekday() >= 5:  # skip weekends
             continue
-        present = random.random() < attendance_rate
+        day_progress = d / max(days_elapsed - 1, 1)  # 0.0 at start, 1.0 at end
+        # Drift centered on the base rate: starts at (base - drift/2),
+        # ends at (base + drift/2), so attendance_rate still represents
+        # roughly the intern's average over the whole period.
+        daily_prob = attendance_rate + attendance_drift * (day_progress - 0.5)
+        daily_prob = min(1.0, max(0.0, daily_prob))
+        present = random.random() < daily_prob
         db.add(Attendance(intern_id=intern.intern_id, date=day, present=present))
 
-    # --- Tasks (roughly 2 per week) ---
+    # --- Tasks (roughly 2 per week, with real drift over time) ---
     num_tasks = max(1, days_elapsed // 4)
     for t in range(num_tasks):
         assigned = start + timedelta(days=t * 4)
         due = assigned + timedelta(days=5)
-        completed_on_time = random.random() < completion_rate
+
+        task_progress = t / max(num_tasks - 1, 1)
+        task_completion_prob = completion_rate + completion_drift * (task_progress - 0.5)
+        task_completion_prob = min(1.0, max(0.0, task_completion_prob))
+
+        completed_on_time = random.random() < task_completion_prob
         difficulty = random.choice(["easy", "medium", "hard"])
 
         if completed_on_time:
@@ -170,7 +231,22 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
         db.flush()  # get task.task_id for the code review below
 
         if status in ("completed", "late"):
-            score = max(0, min(10, random.gauss(review_score_base, 1.0)))
+            # Review score growth mirrors the same trajectory used for
+            # attendance/completion above. Capped to avoid pushing scores
+            # past the 0-10 bounds, which would clip/flatten the trend
+            # for the most extreme improvers/decliners instead of
+            # strengthening it.
+            growth_total = (attendance_drift + completion_drift) * 3.0
+            growth_total = max(-2.0, min(2.0, growth_total))
+            # Noise = 1.0 (original value). We tested lower noise (0.6, 0.4)
+            # to try improving skill_growth, but confirmed via real testing
+            # that it measurably hurts Dropout Risk, Performance Trend, and
+            # especially Success Probability. Since those 3 are the core
+            # predictions, we keep noise at the original level and accept
+            # skill_growth's modest R² (~0.02-0.09 depending on run) as a
+            # documented, well-understood limitation rather than trade away
+            # performance on the more important models.
+            score = max(0, min(10, random.gauss(review_score_base + growth_total * task_progress, 1.0)))
             db.add(CodeReview(
                 intern_id=intern.intern_id,
                 task_id=task.task_id,
@@ -215,7 +291,7 @@ def generate_for_intern(db: Session, intern: Intern, mentor_ids: list[int]):
             meetings_attended=1 if random.random() < attendance_rate else 0,
         ))
 
-    return profile, will_dropout
+    return profile, will_dropout, trajectory
 
 
 def main():
@@ -228,6 +304,7 @@ def main():
 
     print(f"Creating {NUM_INTERNS} interns and their activity data...")
     profile_counts = {"at_risk": 0, "average": 0, "strong": 0}
+    trajectory_counts = {"improving": 0, "stable": 0, "declining": 0}
     status_counts = {"dropped": 0, "completed": 0, "active": 0}
 
     for i in range(NUM_INTERNS):
@@ -246,15 +323,18 @@ def main():
         db.commit()
         db.refresh(intern)
 
-        profile, will_dropout = generate_for_intern(db, intern, mentor_ids)
+        profile, will_dropout, trajectory = generate_for_intern(db, intern, mentor_ids)
         profile_counts[profile] += 1
+        trajectory_counts[trajectory] += 1
 
-        # Decide final status: dropped, completed (internship finished, stayed),
-        # or still active (internship still in progress)
-        days_since_start = (date.today() - start_date).days
+        # Decide final status: dropped, completed, or still active.
+        # NOTE: completed/active is assigned directly (not tied to elapsed
+        # days) so we get a realistic, usable proportion of "completed"
+        # interns to train on, rather than almost everyone sitting in
+        # "active" limbo with an unknown outcome.
         if will_dropout:
             intern.status = "dropped"
-        elif days_since_start >= INTERNSHIP_LENGTH_DAYS:
+        elif random.random() < 0.75:
             intern.status = "completed"
         else:
             intern.status = "active"
@@ -269,6 +349,7 @@ def main():
 
     print("\nDone.")
     print(f"Profile distribution (hidden ground truth): {profile_counts}")
+    print(f"Trajectory distribution (hidden ground truth): {trajectory_counts}")
     print(f"Status distribution (your actual training label): {status_counts}")
     print("Synthetic dataset generated successfully.")
 

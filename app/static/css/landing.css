@@ -1,0 +1,268 @@
+/* ==========================================================
+   Public landing page — nav, hero, feature grid, footer
+   ========================================================== */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 48px;
+  position: relative;
+  z-index: 3;
+}
+.nav .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  color: white;
+  letter-spacing: 0.02em;
+}
+.nav .brand .dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--blue), var(--purple));
+}
+.nav .links {
+  display: flex;
+  gap: 32px;
+}
+.nav .links a {
+  color: #C9D2F5;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+.nav .links a:hover { color: white; }
+.nav .cta-btn {
+  background: white;
+  color: var(--navy);
+  border: none;
+  padding: 9px 20px;
+  border-radius: 9px;
+  font-weight: 600;
+  font-size: 14px;
+  text-decoration: none;
+}
+@media (max-width: 760px) {
+  .nav .links { display: none; }
+}
+
+.hero {
+  position: relative;
+  background: linear-gradient(150deg, var(--navy) 0%, #142958 55%, var(--purple) 160%);
+  overflow: hidden;
+  padding-bottom: 70px;
+}
+
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 40px;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 40px 48px 0;
+  position: relative;
+  z-index: 2;
+  align-items: center;
+}
+@media (max-width: 900px) {
+  .hero-inner { grid-template-columns: 1fr; }
+}
+
+.hero-copy .eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #A9BBFF;
+  margin-bottom: 18px;
+}
+.hero-copy h1 {
+  font-size: 48px;
+  line-height: 1.12;
+  color: white;
+  margin-bottom: 18px;
+}
+.hero-copy h1 .accent {
+  background: linear-gradient(90deg, #8FA6FF, #C9A8FF);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-copy p.lead {
+  color: #C9D2F5;
+  font-size: 16.5px;
+  line-height: 1.65;
+  max-width: 480px;
+  margin-bottom: 30px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 34px;
+}
+.btn-primary {
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  color: white;
+  border: none;
+  padding: 13px 24px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-secondary {
+  background: rgba(255,255,255,0.08);
+  color: white;
+  border: 1px solid rgba(255,255,255,0.2);
+  padding: 13px 22px;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.hero-context {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+.context-chip {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 12.5px;
+  color: #C9D2F5;
+}
+.context-chip strong { color: white; display: block; font-size: 13.5px; margin-bottom: 1px; }
+
+/* Right side: a simple illustrative "signal" panel — small bars +
+   pulse dots, echoing the login page's signature motif so the two
+   pages feel like one product. */
+.hero-visual {
+  position: relative;
+  height: 320px;
+}
+.signal-panel {
+  position: absolute;
+  inset: 0;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 18px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.signal-panel .bars {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  height: 160px;
+}
+.signal-panel .bar {
+  width: 22px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, #8FA6FF, var(--blue));
+}
+.signal-panel .bar.highlight {
+  background: linear-gradient(180deg, #D9C4FF, var(--purple));
+  box-shadow: 0 0 24px rgba(124,92,252,0.5);
+}
+.signal-panel .caption {
+  color: #A9BBFF;
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.bg-dots {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+  background-size: 26px 26px;
+  z-index: 1;
+  opacity: 0.5;
+}
+
+/* ---------------- Feature + mission sections ---------------- */
+.section-wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 70px 48px;
+}
+.section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-weight: 600;
+  font-size: 20px;
+  margin-bottom: 28px;
+}
+.section-label .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--purple);
+}
+
+.feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+}
+@media (max-width: 800px) {
+  .feature-grid { grid-template-columns: 1fr; }
+}
+.feature-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  box-shadow: 0 1px 3px rgba(11,27,63,0.06);
+}
+.feature-card .icon {
+  width: 40px; height: 40px;
+  border-radius: 10px;
+  background: #EEF2FF;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 19px;
+  margin-bottom: 14px;
+}
+.feature-card h4 { font-size: 15.5px; margin-bottom: 6px; }
+.feature-card p { color: var(--subtle); font-size: 13.5px; margin: 0; line-height: 1.55; }
+
+.two-col-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+}
+@media (max-width: 800px) {
+  .two-col-section { grid-template-columns: 1fr; }
+}
+.about-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+.about-card h4 { font-size: 15.5px; margin-bottom: 8px; }
+.about-card p { color: var(--subtle); font-size: 13.5px; line-height: 1.6; margin: 0; }
+
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 26px 48px;
+  text-align: center;
+  color: var(--subtle);
+  font-size: 13px;
+}

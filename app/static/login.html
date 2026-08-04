@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in · Ezitech Institute</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<style>
+  html, body { height: 100%; }
+
+  .login-shell {
+    min-height: 100vh;
+    position: relative;
+    background: linear-gradient(150deg, var(--navy) 0%, #142958 55%, var(--purple) 160%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px;
+    overflow: hidden;
+  }
+
+  .bg-dots {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 26px 26px;
+    opacity: 0.5;
+  }
+
+  .signal-grid {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    grid-template-rows: repeat(10, 1fr);
+    padding: 30px;
+    gap: 14px;
+  }
+  .signal-grid span {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.14);
+    justify-self: center; align-self: center;
+  }
+  .signal-grid span.pulse {
+    background: var(--blue);
+    animation: pulse 3.2s ease-in-out infinite;
+  }
+  .signal-grid span.pulse.amber { background: var(--amber); animation-duration: 2.6s; }
+  .signal-grid span.pulse.d1 { animation-delay: 0.6s; }
+  .signal-grid span.pulse.d2 { animation-delay: 1.4s; }
+  .signal-grid span.pulse.d3 { animation-delay: 2.1s; }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(47,111,237,0.5); }
+    50% { transform: scale(2.2); box-shadow: 0 0 0 6px rgba(47,111,237,0); }
+  }
+
+  .login-card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 20px;
+    padding: 40px 36px 32px;
+    box-shadow: 0 24px 60px rgba(5,10,30,0.35);
+    text-align: center;
+  }
+
+  .avatar-ring {
+    width: 68px; height: 68px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #EEF2FF, #DCE4FF);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 6px rgba(124,92,252,0.08);
+  }
+  .avatar-ring .icon-circle {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    display: flex; align-items: center; justify-content: center;
+    color: white;
+    font-size: 19px;
+  }
+
+  .login-card h2 {
+    font-size: 22px;
+    margin-bottom: 5px;
+  }
+  .login-card .subhead {
+    color: var(--subtle);
+    font-size: 14px;
+    margin-bottom: 28px;
+  }
+
+  .field { text-align: left; margin-bottom: 16px; }
+  .field label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .field-input-wrap {
+    position: relative;
+  }
+  .field-input-wrap .field-icon {
+    position: absolute;
+    left: 13px; top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    opacity: 0.55;
+  }
+  .field input {
+    width: 100%;
+    padding: 11px 14px 11px 38px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    font-size: 14.5px;
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+  }
+  .field input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 3px rgba(47,111,237,0.12);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 13px 16px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(90deg, var(--blue), var(--purple));
+    color: white;
+    font-size: 15px;
+    font-weight: 600;
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .submit-btn:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  .error-box {
+    background: #FEF2F2;
+    border: 1px solid #FCA5A5;
+    color: #B91C1C;
+    font-size: 13px;
+    padding: 10px 13px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+    text-align: left;
+    display: none;
+  }
+  .error-box.visible { display: block; }
+
+  .back-link {
+    display: inline-block;
+    margin-top: 22px;
+    font-size: 13px;
+    color: var(--subtle);
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--blue); }
+
+  .security-note {
+    position: relative;
+    z-index: 2;
+    margin-top: 18px;
+    color: #A9BBFF;
+    font-size: 12.5px;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-shell">
+  <div class="bg-dots"></div>
+  <div class="signal-grid" id="signalGrid"></div>
+
+  <div>
+    <div class="login-card">
+      <div class="avatar-ring"><div class="icon-circle">🔒</div></div>
+      <h2>Welcome back</h2>
+      <p class="subhead">Sign in to continue to your dashboard.</p>
+
+      <div class="error-box" id="errorBox"></div>
+
+      <form id="loginForm">
+        <div class="field">
+          <label for="email">Email</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">👤</span>
+            <input type="email" id="email" name="email" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">🔑</span>
+            <input type="password" id="password" name="password" autocomplete="current-password" required>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn" id="submitBtn">Sign in →</button>
+      </form>
+
+      <a href="/" class="back-link">&larr; Back to home</a>
+    </div>
+    <p class="security-note">🛡️ Your data is protected with role-based access control.</p>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script>
+  const grid = document.getElementById("signalGrid");
+  const total = 16 * 10;
+  const pulseIndexes = new Set();
+  while (pulseIndexes.size < 6) pulseIndexes.add(Math.floor(Math.random() * total));
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement("span");
+    if (pulseIndexes.has(i)) {
+      dot.classList.add("pulse");
+      if (Math.random() < 0.35) dot.classList.add("amber");
+      const d = Math.random();
+      dot.classList.add(d < 0.33 ? "d1" : d < 0.66 ? "d2" : "d3");
+    }
+    grid.appendChild(dot);
+  }
+
+  const existing = getSession();
+  if (existing && existing.access_token) redirectToDashboard(existing.role);
+
+  const form = document.getElementById("loginForm");
+  const errorBox = document.getElementById("errorBox");
+  const submitBtn = document.getElementById("submitBtn");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove("visible");
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Signing in...";
+
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value;
+
+    try {
+      const session = await login(email, password);
+      redirectToDashboard(session.role);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.add("visible");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Sign in →";
+    }
+  });
+</script>
+</body>
+</html>

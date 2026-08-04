@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS mentors (
     mentor_id       SERIAL PRIMARY KEY,
     name            VARCHAR(100) NOT NULL,
     technology      VARCHAR(50),
-    email           VARCHAR(100) UNIQUE
+    email           VARCHAR(100) UNIQUE,
+    max_capacity    INTEGER DEFAULT 8
 );
 
 CREATE TABLE IF NOT EXISTS interns (
@@ -98,8 +99,24 @@ CREATE TABLE IF NOT EXISTS recommendations (
     created_at          TIMESTAMP DEFAULT NOW()
 );
 
+-- Weekly performance snapshot - built by app/ml/build_weekly_performance.py
+-- AFTER data generation, reading from the tables above. Satisfies the
+-- case study's "Weekly Performance" / "Daily Productivity" data points.
+CREATE TABLE IF NOT EXISTS weekly_performance (
+    weekly_id             SERIAL PRIMARY KEY,
+    intern_id             INTEGER REFERENCES interns(intern_id),
+    week_number           INTEGER NOT NULL,
+    week_start_date       DATE NOT NULL,
+    attendance_rate       NUMERIC(5,4),
+    task_completion_rate  NUMERIC(5,4),
+    avg_commits           NUMERIC(6,2),
+    avg_review_score      NUMERIC(4,2),
+    UNIQUE(intern_id, week_number)
+);
+
 -- Helpful indexes
 CREATE INDEX IF NOT EXISTS idx_attendance_intern ON attendance(intern_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_intern ON tasks(intern_id);
 CREATE INDEX IF NOT EXISTS idx_github_intern ON github_activity(intern_id);
 CREATE INDEX IF NOT EXISTS idx_predictions_intern ON predictions(intern_id);
+CREATE INDEX IF NOT EXISTS idx_weekly_performance_intern ON weekly_performance(intern_id);

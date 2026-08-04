@@ -1,0 +1,53 @@
+/* ==========================================================
+   Ezitech Internship Analytics — shared design tokens
+   ========================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --navy: #0B1B3F;
+  --navy-light: #16244A;
+  --navy-lighter: #1F2E5C;
+  --blue: #2F6FED;
+  --purple: #7C5CFC;
+  --bg: #F4F6FC;
+  --ink: #1D2540;
+  --subtle: #6B7280;
+  --green: #16A34A;
+  --amber: #D97706;
+  --red: #DC2626;
+  --border: #E5E9F5;
+  --radius: 14px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+a { color: inherit; }
+
+button {
+  font-family: 'Inter', sans-serif;
+  cursor: pointer;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}

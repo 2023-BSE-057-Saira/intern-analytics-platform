@@ -4,3 +4,5 @@ __pycache__/
 .env
 app/ml/saved_models/*.json
 app/ml/saved_models/*.pkl
+
+.venv-dashboard/
