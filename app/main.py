@@ -10,6 +10,8 @@ from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import Base, engine
 from app.routers import admin, auth, interns, predictions, recommendations
+from app.routers import admin, auth, interns, mentor, predictions, recommendations
+
 
 Base.metadata.create_all(bind=engine)
 
@@ -32,6 +34,7 @@ app.include_router(admin.router)
 app.include_router(interns.router)
 app.include_router(predictions.router)
 app.include_router(recommendations.router)
+app.include_router(mentor.router)
 
 Instrumentator().instrument(app).expose(app)
 
@@ -59,3 +62,7 @@ def serve_admin():
 @app.get("/health", tags=["Health"])
 def health_check():
     return {"status": "healthy"}
+
+@app.get("/mentor")
+def serve_mentor():
+    return FileResponse("app/static/mentor.html")

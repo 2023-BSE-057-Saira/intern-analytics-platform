@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mentor · Ezitech Institute</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> EZITECH</div>
+
+    <a href="/mentor" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      Dashboard
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 8.2a3 3 0 1 1 3.6 4.4"/><path d="M15.5 14c2.8.3 5 2.3 5 5.5"/></svg>
+      My Interns
+    </div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Recommendations
+    </div>
+
+    <div class="nav-section-label">Analytics</div>
+    <a href="/mentor" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      Overview
+    </a>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg>
+      Risk Alerts
+    </div>
+
+    <div class="nav-section-label">Account</div>
+    <div class="nav-item disabled">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a2 2 0 0 0 .4 2.2l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-2.2-.4 2 2 0 0 0-1.2 1.8V20a2 2 0 1 1-4 0v-.2a2 2 0 0 0-1.2-1.8 2 2 0 0 0-2.2.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a2 2 0 0 0 .4-2.2 2 2 0 0 0-1.8-1.2H2a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.8-1.2 2 2 0 0 0-.4-2.2l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a2 2 0 0 0 2.2.4H9a2 2 0 0 0 1.2-1.8V2a2 2 0 1 1 4 0v.2a2 2 0 0 0 1.2 1.8 2 2 0 0 0 2.2-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0-.4 2.2v.1a2 2 0 0 0 1.8 1.2H22a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.8 1.2Z"/></svg>
+      Settings
+    </div>
+
+    <div class="help-card">
+      <h5>Need help?</h5>
+      <p>Ezitech Institute · AI-Powered Internship Performance & Risk Analytics Platform.</p>
+      <a href="mailto:info@ezitech.org">Contact Support</a>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="top-search-bar">
+      <div class="search-input-wrap">
+        <span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="15" height="15"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg></span>
+        <input type="text" id="globalSearch" placeholder="Search your interns by name or technology…">
+      </div>
+      <div class="top-user-area">
+        <div class="user-menu-wrap">
+          <button class="user-menu-trigger" id="userMenuTrigger">
+            <div class="avatar-circle" id="topAvatar" style="background:var(--blue)">M</div>
+            <div class="name-block">
+              <div class="name" id="userName">—</div>
+              <div class="role">Mentor</div>
+            </div>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button onclick="logout()">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="page-banner">
+        <p class="eyebrow" id="welcomeLine">Mentor</p>
+        <h1>Mentor Dashboard</h1>
+        <p>Your interns, your workload, and this week's AI suggestions.</p>
+      </div>
+
+      <div class="section-header-row">
+        <div></div>
+        <div class="meta-row">
+          <span id="lastUpdated"></span>
+          <button class="refresh-btn" id="refreshBtn">↻ Refresh</button>
+        </div>
+      </div>
+
+      <div id="content">
+        <div class="skeleton-kpi-row">
+          <div class="skeleton-block"></div><div class="skeleton-block"></div>
+          <div class="skeleton-block"></div>
+        </div>
+        <div class="skeleton-table"><div class="skeleton-block"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script>
+  const AVATAR_COLORS = ["#2F6FED", "#7C5CFC", "#16A34A", "#D97706", "#DC2626", "#0EA5E9"];
+
+  const session = requireSession("mentor");
+  let cachedRoster = [], cachedWeak = [], cachedStrong = [];
+  let weakExpanded = false, strongExpanded = false;
+  let weakCols, strongCols, rosterCols;
+
+  if (session) {
+    document.getElementById("userName").textContent = session.name;
+    document.getElementById("welcomeLine").textContent = `Welcome back, ${session.name.split(" ")[0]}!`;
+    document.getElementById("topAvatar").textContent = initials(session.name);
+    document.getElementById("topAvatar").style.background = avatarColor(session.name);
+    loadOverview();
+  }
+
+  document.getElementById("refreshBtn").addEventListener("click", loadOverview);
+  document.getElementById("globalSearch").addEventListener("input", (e) => {
+    applyGlobalFilter(e.target.value.trim().toLowerCase());
+  });
+
+  const userMenuTrigger = document.getElementById("userMenuTrigger");
+  const userMenuDropdown = document.getElementById("userMenuDropdown");
+  userMenuTrigger.addEventListener("click", (e) => {
+    e.stopPropagation();
+    userMenuDropdown.classList.toggle("open");
+  });
+  document.addEventListener("click", () => userMenuDropdown.classList.remove("open"));
+
+  function pct(value) {
+    if (value === null || value === undefined) return "—";
+    return (value * 100).toFixed(1) + "%";
+  }
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+  function avatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+  function nameCell(r) {
+    return `<div class="avatar-cell">
+      <div class="avatar-circle" style="background:${avatarColor(r.name)}">${initials(r.name)}</div>
+      <span>${r.name || "—"}</span>
+    </div>`;
+  }
+  function riskPill(value) {
+    if (value === null || value === undefined) return '<span class="pill pill-gray">—</span>';
+    const barClass = value > 0.7 ? "red" : value > 0.4 ? "" : "green";
+    const barColor = value > 0.4 && value <= 0.7 ? "background:var(--amber);" : "";
+    const pillClass = value > 0.7 ? "pill-red" : value > 0.4 ? "pill-amber" : "pill-green";
+    return `<span class="bar-track"><span class="bar-fill ${barClass}" style="width:${Math.min(value*100,100)}%;${barColor}"></span></span><span class="pill ${pillClass}">${pct(value)}</span>`;
+  }
+  function successPill(value) {
+    if (value === null || value === undefined) return '<span class="pill pill-gray">—</span>';
+    return `<span class="bar-track"><span class="bar-fill green" style="width:${Math.min(value*100,100)}%"></span></span><span class="pill pill-green">${pct(value)}</span>`;
+  }
+  function trendLabel(label) {
+    const map = {
+      improving: '<span class="pill pill-green">▲ Improving</span>',
+      stable: '<span class="pill pill-gray">▬ Stable</span>',
+      declining: '<span class="pill pill-red">▼ Declining</span>',
+    };
+    return map[label] || '<span class="pill pill-gray">—</span>';
+  }
+  function statusBadge(status) {
+    const map = {
+      active: '<span class="status-badge status-active">Active</span>',
+      completed: '<span class="status-badge status-completed">Completed</span>',
+      dropped: '<span class="status-badge status-dropped">Dropped</span>',
+    };
+    return map[status] || `<span class="status-badge">${status || "—"}</span>`;
+  }
+
+  function renderTable(rows, columns, emptyMessage) {
+    if (!rows.length) {
+      return `<table class="data-table"><thead><tr>${columns.map(c => `<th>${c.label}</th>`).join("")}</tr></thead>
+        <tbody><tr class="empty-row"><td colspan="${columns.length}">${emptyMessage}</td></tr></tbody></table>`;
+    }
+    const head = columns.map(c => `<th>${c.label}</th>`).join("");
+    const body = rows.map(r => `<tr>${columns.map(c => `<td>${c.render ? c.render(r) : (r[c.key] ?? "—")}</td>`).join("")}</tr>`).join("");
+    return `<table class="data-table"><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+  }
+
+  function renderCappedCard(containerId, allRows, columns, emptyMessage, expandedFlagGetter, toggleFn, title) {
+    const container = document.getElementById(containerId);
+    const expanded = expandedFlagGetter();
+    const visible = expanded ? allRows : allRows.slice(0, 5);
+    const toggleLabel = expanded ? "Show less ↑" : ("View All " + allRows.length + " →");
+    const toggleButtonHtml = allRows.length > 5
+      ? '<div class="view-all-row"><button id="' + containerId + '-toggle">' + toggleLabel + '</button></div>'
+      : "";
+    container.innerHTML = `
+      <div class="card-header">
+        <h4>${title} <span class="sub-count">(${allRows.length} match${allRows.length === 1 ? "" : "es"})</span></h4>
+      </div>
+      <div style="margin-top:12px;">${renderTable(visible, columns, emptyMessage)}</div>
+      ${toggleButtonHtml}
+    `;
+    if (allRows.length > 5) {
+      document.getElementById(`${containerId}-toggle`).addEventListener("click", toggleFn);
+    }
+  }
+
+  function applyGlobalFilter(q) {
+    const filterFn = r => !q || (r.name || "").toLowerCase().includes(q) || (r.technology || "").toLowerCase().includes(q);
+    renderCappedCard("weakContainer", cachedWeak.filter(filterFn), weakCols,
+      "No students match.", () => weakExpanded, toggleWeak, "Weak Students");
+    renderCappedCard("strongContainer", cachedStrong.filter(filterFn), strongCols,
+      "No students match.", () => strongExpanded, toggleStrong, "Strong Students");
+    document.getElementById("rosterContainer").innerHTML =
+      renderTable(cachedRoster.filter(filterFn), rosterCols, "No interns match.");
+  }
+  function toggleWeak() { weakExpanded = !weakExpanded; applyGlobalFilter(document.getElementById("globalSearch").value.trim().toLowerCase()); }
+  function toggleStrong() { strongExpanded = !strongExpanded; applyGlobalFilter(document.getElementById("globalSearch").value.trim().toLowerCase()); }
+
+  async function loadOverview() {
+    const refreshBtn = document.getElementById("refreshBtn");
+    refreshBtn.disabled = true;
+    refreshBtn.textContent = "↻ Refreshing…";
+    try {
+      const res = await apiFetch("/mentor/overview");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || "Failed to load dashboard data.");
+      }
+      const data = await res.json();
+      render(data);
+      document.getElementById("lastUpdated").textContent =
+        "Last updated " + new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    } catch (err) {
+      console.error("Mentor dashboard load error:", err);
+      document.getElementById("content").innerHTML =
+        `<p class="loading-note">Couldn't load dashboard data: ${err.message}</p>`;
+    } finally {
+      refreshBtn.disabled = false;
+      refreshBtn.textContent = "↻ Refresh";
+    }
+  }
+
+  function render(data) {
+    const m = data.mentor;
+
+    weakCols = [
+      { key: "name", label: "Intern", render: nameCell },
+      { key: "technology", label: "Technology" },
+      { key: "dropout_risk", label: "Dropout Risk", render: r => riskPill(r.dropout_risk) },
+      { key: "performance_trend", label: "Trend", render: r => trendLabel(r.performance_trend) },
+    ];
+    strongCols = [
+      { key: "name", label: "Intern", render: nameCell },
+      { key: "technology", label: "Technology" },
+      { key: "success_probability", label: "Success Probability", render: r => successPill(r.success_probability) },
+      { key: "performance_trend", label: "Trend", render: r => trendLabel(r.performance_trend) },
+    ];
+    rosterCols = [
+      { key: "name", label: "Intern", render: nameCell },
+      { key: "technology", label: "Technology" },
+      { key: "batch", label: "Batch" },
+      { key: "status", label: "Status", render: r => statusBadge(r.status) },
+      { key: "dropout_risk", label: "Dropout Risk", render: r => riskPill(r.dropout_risk) },
+      { key: "success_probability", label: "Success Prob.", render: r => successPill(r.success_probability) },
+    ];
+
+    cachedRoster = data.roster;
+    cachedWeak = data.weak_students;
+    cachedStrong = data.strong_students;
+
+    const utilTone = m.utilization_pct === null ? "gray" : m.utilization_pct > 100 ? "red" : m.utilization_pct > 80 ? "amber" : "green";
+
+    const recsHtml = data.recommendations.length
+      ? data.recommendations.map(r => `
+          <div class="rec-item">
+            <div class="rec-avatar" style="background:${avatarColor(r.intern_name)}">${initials(r.intern_name)}</div>
+            <div class="rec-body">
+              <div class="rec-name">${r.intern_name} <span class="pill pill-gray" style="margin-left:6px;">${r.recommendation_type.replace(/_/g, " ")}</span></div>
+              <div class="rec-message">${r.message}</div>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="loading-note">No recommendations generated yet for your interns. Generate them from an intern's detail page.</div>`;
+
+    document.getElementById("content").innerHTML = `
+      <div class="kpi-row">
+        <div class="kpi-card blue animate-in">
+          <div class="icon-row"><div class="label">Active Interns</div>
+            <div class="icon-badge-circle blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg></div>
+          </div>
+          <div class="value">${m.active_interns}</div>
+          <div class="caption">currently assigned to you</div>
+        </div>
+        <div class="kpi-card animate-in">
+          <div class="icon-row"><div class="label">Capacity</div>
+            <div class="icon-badge-circle purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/></svg></div>
+          </div>
+          <div class="value">${m.max_capacity ?? "—"}</div>
+          <div class="caption">maximum interns you can mentor</div>
+        </div>
+        <div class="kpi-card ${utilTone} animate-in">
+          <div class="icon-row"><div class="label">Utilization</div>
+            <div class="icon-badge-circle ${utilTone === 'gray' ? '' : utilTone}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 17l6-6 4 4 8-9"/></svg></div>
+          </div>
+          <div class="value">${m.utilization_pct !== null ? m.utilization_pct + "%" : "—"}</div>
+          <div class="caption">${m.utilization_pct > 100 ? "over capacity" : "of your capacity"}</div>
+        </div>
+      </div>
+
+      <div class="two-col">
+        <div class="card-with-header" id="weakContainer"></div>
+        <div class="card-with-header" id="strongContainer"></div>
+      </div>
+
+      <div class="section-title"><span class="dot"></span> Weekly AI Suggestions</div>
+      <div class="data-card" style="padding:6px 0;">${recsHtml}</div>
+
+      <div class="section-title"><span class="dot"></span> Your Full Roster</div>
+      <div class="data-card" id="rosterContainer"></div>
+    `;
+
+    applyGlobalFilter("");
+  }
+</script>
+</body>
+</html>
