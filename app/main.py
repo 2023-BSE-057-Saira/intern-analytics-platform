@@ -9,8 +9,7 @@ from fastapi.responses import FileResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import Base, engine
-from app.routers import admin, auth, interns, predictions, recommendations
-from app.routers import admin, auth, interns, mentor, predictions, recommendations
+from app.routers import admin, auth, interns, mentor, predictions, recommendations, student
 
 
 Base.metadata.create_all(bind=engine)
@@ -35,6 +34,7 @@ app.include_router(interns.router)
 app.include_router(predictions.router)
 app.include_router(recommendations.router)
 app.include_router(mentor.router)
+app.include_router(student.router)
 
 Instrumentator().instrument(app).expose(app)
 
@@ -59,10 +59,26 @@ def serve_admin():
     return FileResponse("app/static/admin.html")
 
 
-@app.get("/health", tags=["Health"])
-def health_check():
-    return {"status": "healthy"}
+@app.get("/register")
+def serve_register():
+    return FileResponse("app/static/register.html")
+
 
 @app.get("/mentor")
 def serve_mentor():
     return FileResponse("app/static/mentor.html")
+
+
+@app.get("/student")
+def serve_student():
+    return FileResponse("app/static/student.html")
+
+
+@app.get("/settings")
+def serve_settings():
+    return FileResponse("app/static/settings.html")
+
+
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {"status": "healthy"}

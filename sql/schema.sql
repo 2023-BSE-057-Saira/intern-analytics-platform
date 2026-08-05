@@ -20,7 +20,16 @@ CREATE TABLE IF NOT EXISTS interns (
     batch               VARCHAR(50),
     start_date          DATE NOT NULL,
     expected_end_date   DATE,
-    status              VARCHAR(20) DEFAULT 'active'  -- active, completed, dropped
+    status              VARCHAR(20) DEFAULT 'active',  -- active, completed, dropped
+    -- Self-service profile fields, filled in by the student after
+    -- registration via /student/profile (see student_features_migration.sql)
+    phone               VARCHAR(30),
+    education           VARCHAR(200),
+    skills              TEXT,          -- comma-separated, kept simple on purpose
+    bio                 TEXT,
+    linkedin_url        VARCHAR(255),
+    github_url          VARCHAR(255),
+    avatar_color        VARCHAR(20)
 );
 
 CREATE TABLE IF NOT EXISTS attendance (
@@ -114,9 +123,35 @@ CREATE TABLE IF NOT EXISTS weekly_performance (
     UNIQUE(intern_id, week_number)
 );
 
+-- Weekly reports: student self-reported summary of the week
+CREATE TABLE IF NOT EXISTS weekly_reports (
+    report_id        SERIAL PRIMARY KEY,
+    intern_id         INTEGER REFERENCES interns(intern_id),
+    week_start_date   DATE NOT NULL,
+    hours_worked      NUMERIC(5,2),
+    summary           TEXT NOT NULL,
+    challenges        TEXT,
+    created_at        TIMESTAMP DEFAULT NOW(),
+    UNIQUE(intern_id, week_start_date)
+);
+
+-- Project submissions: link-based (repo URL), visible to the
+-- assigned mentor and admins
+CREATE TABLE IF NOT EXISTS project_submissions (
+    submission_id     SERIAL PRIMARY KEY,
+    intern_id          INTEGER REFERENCES interns(intern_id),
+    title              VARCHAR(200) NOT NULL,
+    description        TEXT,
+    repo_url           VARCHAR(500) NOT NULL,
+    demo_url           VARCHAR(500),
+    submitted_at       TIMESTAMP DEFAULT NOW()
+);
+
 -- Helpful indexes
 CREATE INDEX IF NOT EXISTS idx_attendance_intern ON attendance(intern_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_intern ON tasks(intern_id);
 CREATE INDEX IF NOT EXISTS idx_github_intern ON github_activity(intern_id);
 CREATE INDEX IF NOT EXISTS idx_predictions_intern ON predictions(intern_id);
 CREATE INDEX IF NOT EXISTS idx_weekly_performance_intern ON weekly_performance(intern_id);
+CREATE INDEX IF NOT EXISTS idx_weekly_reports_intern ON weekly_reports(intern_id);
+CREATE INDEX IF NOT EXISTS idx_project_submissions_intern ON project_submissions(intern_id);

@@ -14,10 +14,19 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.db_models import Intern, Mentor, Prediction, Recommendation
+from app.models.db_models import Intern, Mentor, Prediction, Recommendation, WeeklyReport, ProjectSubmission
 from app.security import require_role
 
 router = APIRouter(prefix="/mentor", tags=["Mentor"])
+
+
+def _own_intern_ids(db: Session, current_user) -> list:
+    if not current_user.mentor_id:
+        raise HTTPException(status_code=400, detail="This account isn't linked to a mentor record.")
+    return [
+        i.intern_id for i in
+        db.query(Intern.intern_id).filter(Intern.mentor_id == current_user.mentor_id).all()
+    ]
 
 
 def _latest_predictions_by_intern(db: Session, intern_ids: list) -> dict:
@@ -133,3 +142,60 @@ def get_mentor_overview(db: Session = Depends(get_db),
             for s in suggestions
         ],
     }
+
+
+@router.get("/weekly-reports")
+def get_mentor_weekly_reports(db: Session = Depends(get_db),
+                               current_user=Depends(require_role("mentor"))):
+    intern_ids = _own_intern_ids(db, current_user)
+    if not intern_ids:
+        return []
+    names = {i.intern_id: i.name for i in db.query(Intern).filter(Intern.intern_id.in_(intern_ids)).all()}
+    reports = (
+        db.query(WeeklyReport)
+        .filter(WeeklyReport.intern_id.in_(intern_ids))
+        .order_by(WeeklyReport.week_start_date.desc())
+        .limit(50)
+        .all()
+    )
+    return [
+        {
+            "report_id": r.report_id,
+            "intern_id": r.intern_id,
+            "intern_name": names.get(r.intern_id, "—"),
+            "week_start_date": r.week_start_date.isoformat(),
+            "hours_worked": float(r.hours_worked) if r.hours_worked is not None else None,
+            "summary": r.summary,
+            "challenges": r.challenges,
+        }
+        for r in reports
+    ]
+
+
+@router.get("/projects")
+def get_mentor_projects(db: Session = Depends(get_db),
+                         current_user=Depends(require_role("mentor"))):
+    intern_ids = _own_intern_ids(db, current_user)
+    if not intern_ids:
+        return []
+    names = {i.intern_id: i.name for i in db.query(Intern).filter(Intern.intern_id.in_(intern_ids)).all()}
+    subs = (
+        db.query(ProjectSubmission)
+        .filter(ProjectSubmission.intern_id.in_(intern_ids))
+        .order_by(ProjectSubmission.submitted_at.desc())
+        .limit(50)
+        .all()
+    )
+    return [
+        {
+            "submission_id": s.submission_id,
+            "intern_id": s.intern_id,
+            "intern_name": names.get(s.intern_id, "—"),
+            "title": s.title,
+            "description": s.description,
+            "repo_url": s.repo_url,
+            "demo_url": s.demo_url,
+            "submitted_at": s.submitted_at.isoformat(),
+        }
+        for s in subs
+    ]

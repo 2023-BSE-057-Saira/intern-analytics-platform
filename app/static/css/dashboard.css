@@ -593,6 +593,127 @@ table.data-table tbody tr:hover td {
 .chart-card.spark-card { padding: 16px; }
 .chart-card.spark-card canvas { max-height: 40px !important; }
 
+/* ================= Student dashboard / Settings additions ================= */
+.profile-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px;
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.profile-avatar-lg {
+  width: 62px; height: 62px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 20px; font-weight: 700;
+  flex-shrink: 0;
+}
+.profile-card h3 { font-size: 17px; margin-bottom: 3px; }
+.profile-card .profile-sub { color: var(--subtle); font-size: 13px; margin-bottom: 12px; }
+.profile-meta-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.profile-meta-row .pill { background: #F1F3F9; color: var(--ink); }
+.profile-bio { font-size: 13.5px; color: var(--ink); line-height: 1.6; margin-bottom: 4px; }
+.profile-links { display: flex; gap: 14px; margin-top: 8px; }
+.profile-links a { font-size: 12.5px; color: var(--blue); text-decoration: none; font-weight: 600; }
+.profile-links a:hover { text-decoration: underline; }
+.edit-profile-btn {
+  margin-left: auto;
+  border: 1px solid var(--border);
+  background: white;
+  color: var(--ink);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 7px 14px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+.edit-profile-btn:hover { border-color: var(--blue); color: var(--blue); }
+
+.form-card {
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px 22px;
+}
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-grid .span-2 { grid-column: 1 / -1; }
+@media (max-width: 700px) { .form-grid { grid-template-columns: 1fr; } }
+.form-field { margin-bottom: 4px; }
+.form-field label {
+  display: block; font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px;
+}
+.form-field input, .form-field textarea, .form-field select {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 9px;
+  border: 1.5px solid var(--border);
+  font-size: 13.5px;
+  font-family: 'Inter', sans-serif;
+  color: var(--ink);
+  background: white;
+  resize: vertical;
+}
+.form-field input:focus, .form-field textarea:focus, .form-field select:focus {
+  outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,111,237,0.12);
+}
+.form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
+.btn-solid {
+  background: linear-gradient(90deg, var(--blue), var(--purple));
+  color: white; border: none;
+  padding: 10px 20px; border-radius: 9px;
+  font-size: 13.5px; font-weight: 600;
+}
+.btn-solid:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-ghost {
+  background: white; border: 1px solid var(--border); color: var(--subtle);
+  padding: 10px 18px; border-radius: 9px; font-size: 13.5px; font-weight: 600;
+}
+.btn-ghost:hover { border-color: var(--red); color: var(--red); }
+
+.form-note { font-size: 12px; margin-top: 10px; display: none; }
+.form-note.success { color: var(--green); display: block; }
+.form-note.error { color: var(--red); display: block; }
+
+.attendance-btn {
+  border: none; border-radius: 10px;
+  padding: 12px 22px; font-size: 14px; font-weight: 700;
+  color: white;
+  background: linear-gradient(90deg, var(--green), #15803D);
+  display: inline-flex; align-items: center; gap: 8px;
+}
+.attendance-btn:disabled {
+  background: #EEF0F7; color: var(--subtle); cursor: default; opacity: 1;
+}
+.streak-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12.5px; color: var(--subtle); margin-top: 8px;
+}
+
+.list-item-card {
+  background: white; border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px 18px; margin-bottom: 10px;
+}
+.list-item-card .item-top {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.list-item-card .item-title { font-size: 14px; font-weight: 700; color: var(--ink); }
+.list-item-card .item-date { font-size: 11.5px; color: var(--subtle); }
+.list-item-card .item-body { font-size: 13px; color: var(--ink); line-height: 1.6; }
+.list-item-card a.item-link { font-size: 12.5px; color: var(--blue); font-weight: 600; text-decoration: none; }
+.list-item-card a.item-link:hover { text-decoration: underline; }
+
+.tab-row { display: flex; gap: 6px; margin-bottom: 18px; border-bottom: 1px solid var(--border); }
+.tab-btn {
+  background: none; border: none; padding: 10px 4px; margin-right: 22px;
+  font-size: 13.5px; font-weight: 600; color: var(--subtle);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+}
+.tab-btn.active { color: var(--blue); border-bottom-color: var(--blue); }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
 /* ================= Mentor dashboard additions ================= */
 .kpi-card.blue { border-left-color: var(--blue); }
 

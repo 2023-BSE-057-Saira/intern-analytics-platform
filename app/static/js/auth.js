@@ -101,3 +101,32 @@ async function login(email, password) {
 function redirectToDashboard(role) {
   window.location.href = `/${role}`;
 }
+
+/**
+ * Registers a new student account. Returns the session object (role
+ * is always "student") on success, throws with a readable message
+ * on failure — mirrors login() above.
+ */
+async function register(name, email, password, technology, batch) {
+  const response = await fetch("/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ name, email, password, technology, batch: batch || null }),
+  });
+
+  if (!response.ok) {
+    const body = await response.json().catch(() => ({}));
+    if (response.status === 409) {
+      throw new Error("An account with this email already exists. Try signing in instead.");
+    }
+    if (response.status === 422) {
+      throw new Error(body.detail || "Please check the form and try again.");
+    }
+    throw new Error(body.detail || "Something went wrong creating your account. Please try again.");
+  }
+
+  const data = await response.json();
+  const session = { access_token: data.access_token, role: "student", name: data.name, linked_id: data.linked_id };
+  saveSession(session);
+  return session;
+}

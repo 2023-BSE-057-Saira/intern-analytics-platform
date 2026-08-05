@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student · Ezitech Institute</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> EZITECH</div>
+
+    <a href="/student" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      Dashboard
+    </a>
+
+    <div class="nav-section-label">My Work</div>
+    <a href="#reports" class="nav-item" data-tab-link="reports">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 3h9l3 3v15H6z"/><path d="M9 12h6M9 16h6M9 8h3"/></svg>
+      Weekly Reports
+    </a>
+    <a href="#projects" class="nav-item" data-tab-link="projects">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m8 9-4 3 4 3M16 9l4 3-4 3M13.5 6l-3 12"/></svg>
+      Projects
+    </a>
+    <a href="#profile" class="nav-item" data-tab-link="profile">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/></svg>
+      My Profile
+    </a>
+
+    <div class="nav-section-label">Account</div>
+    <a href="/settings" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a2 2 0 0 0 .4 2.2l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-2.2-.4 2 2 0 0 0-1.2 1.8V20a2 2 0 1 1-4 0v-.2a2 2 0 0 0-1.2-1.8 2 2 0 0 0-2.2.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a2 2 0 0 0 .4-2.2 2 2 0 0 0-1.8-1.2H2a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.8-1.2 2 2 0 0 0-.4-2.2l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a2 2 0 0 0 2.2.4H9a2 2 0 0 0 1.2-1.8V2a2 2 0 1 1 4 0v.2a2 2 0 0 0 1.2 1.8 2 2 0 0 0 2.2-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0-.4 2.2v.1a2 2 0 0 0 1.8 1.2H22a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.8 1.2Z"/></svg>
+      Settings
+    </a>
+
+    <div class="help-card">
+      <h5>Need help?</h5>
+      <p>Ezitech Institute · AI-Powered Internship Performance & Risk Analytics Platform.</p>
+      <a href="mailto:info@ezitech.org">Contact Support</a>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="top-search-bar">
+      <div></div>
+      <div class="top-user-area">
+        <div class="user-menu-wrap">
+          <button class="user-menu-trigger" id="userMenuTrigger">
+            <div class="avatar-circle" id="topAvatar" style="background:var(--blue)">S</div>
+            <div class="name-block">
+              <div class="name" id="userName">—</div>
+              <div class="role">Student</div>
+            </div>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button onclick="logout()">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="page-banner">
+        <p class="eyebrow" id="welcomeLine">Student</p>
+        <h1>My Dashboard</h1>
+        <p>Your progress, your attendance, your weekly wins — all in one place.</p>
+      </div>
+
+      <div class="tab-row">
+        <button class="tab-btn active" data-tab="overview">Overview</button>
+        <button class="tab-btn" data-tab="reports">Weekly Reports</button>
+        <button class="tab-btn" data-tab="projects">Projects</button>
+        <button class="tab-btn" data-tab="profile">My Profile</button>
+      </div>
+
+      <div id="loadingNote" class="loading-note">Loading your dashboard…</div>
+
+      <!-- ===================== OVERVIEW TAB ===================== -->
+      <div class="tab-panel active" id="panel-overview">
+        <div class="kpi-row" id="kpiRow"></div>
+
+        <div class="two-col">
+          <div class="chart-card animate-in">
+            <div class="section-title" style="margin-top:0;"><span class="dot"></span> Mark Today's Attendance</div>
+            <div id="attendanceBox"></div>
+          </div>
+          <div class="chart-card animate-in">
+            <div class="section-title" style="margin-top:0;"><span class="dot"></span> Task Snapshot</div>
+            <div id="taskBox"></div>
+          </div>
+        </div>
+
+        <div class="section-title"><span class="dot"></span> This Week's AI Suggestions</div>
+        <div class="data-card" style="padding:6px 0;" id="suggestionsBox"></div>
+      </div>
+
+      <!-- ===================== WEEKLY REPORTS TAB ===================== -->
+      <div class="tab-panel" id="panel-reports">
+        <div class="form-card" style="margin-bottom:22px;">
+          <div class="section-title" style="margin-top:0;"><span class="dot"></span> Submit This Week's Report</div>
+          <form id="reportForm">
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="weekStart">Week starting</label>
+                <input type="date" id="weekStart" required>
+              </div>
+              <div class="form-field">
+                <label for="hoursWorked">Hours worked</label>
+                <input type="number" id="hoursWorked" min="0" max="80" step="0.5" placeholder="e.g. 35">
+              </div>
+              <div class="form-field span-2">
+                <label for="summary">What did you work on this week?</label>
+                <textarea id="summary" rows="3" required placeholder="Summarize what you built, learned, or shipped…"></textarea>
+              </div>
+              <div class="form-field span-2">
+                <label for="challenges">Any blockers or challenges? <span style="font-weight:400;color:var(--subtle);">(optional)</span></label>
+                <textarea id="challenges" rows="2" placeholder="Anything your mentor should know about…"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="form-note" id="reportNote"></div>
+              <button type="submit" class="btn-solid" id="reportSubmitBtn">Submit Report</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="section-title" style="margin-top:0;"><span class="dot"></span> Your Report History</div>
+        <div id="reportsList"></div>
+      </div>
+
+      <!-- ===================== PROJECTS TAB ===================== -->
+      <div class="tab-panel" id="panel-projects">
+        <div class="form-card" style="margin-bottom:22px;">
+          <div class="section-title" style="margin-top:0;"><span class="dot"></span> Submit a Project</div>
+          <p style="font-size:12.5px;color:var(--subtle);margin:-6px 0 14px;">Your mentor can see everything you submit here.</p>
+          <form id="projectForm">
+            <div class="form-grid">
+              <div class="form-field span-2">
+                <label for="projTitle">Project title</label>
+                <input type="text" id="projTitle" required placeholder="e.g. Intern Attendance Bot">
+              </div>
+              <div class="form-field">
+                <label for="repoUrl">Repository URL</label>
+                <input type="url" id="repoUrl" required placeholder="https://github.com/you/project">
+              </div>
+              <div class="form-field">
+                <label for="demoUrl">Live demo URL <span style="font-weight:400;color:var(--subtle);">(optional)</span></label>
+                <input type="url" id="demoUrl" placeholder="https://your-demo.com">
+              </div>
+              <div class="form-field span-2">
+                <label for="projDescription">Description</label>
+                <textarea id="projDescription" rows="3" placeholder="What does it do, what did you use to build it?"></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="form-note" id="projectNote"></div>
+              <button type="submit" class="btn-solid" id="projectSubmitBtn">Submit Project</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="section-title" style="margin-top:0;"><span class="dot"></span> Your Submissions</div>
+        <div id="projectsList"></div>
+      </div>
+
+      <!-- ===================== PROFILE TAB ===================== -->
+      <div class="tab-panel" id="panel-profile">
+        <div class="form-card">
+          <div class="section-title" style="margin-top:0;"><span class="dot"></span> Edit My Profile</div>
+          <form id="profileForm">
+            <div class="form-grid">
+              <div class="form-field">
+                <label for="phone">Phone</label>
+                <input type="text" id="phone" placeholder="e.g. +92 300 1234567">
+              </div>
+              <div class="form-field">
+                <label for="education">Education</label>
+                <input type="text" id="education" placeholder="e.g. BS Computer Science, COMSATS">
+              </div>
+              <div class="form-field span-2">
+                <label for="skills">Skills <span style="font-weight:400;color:var(--subtle);">(comma-separated)</span></label>
+                <input type="text" id="skills" placeholder="e.g. React, Node.js, Python, Figma">
+              </div>
+              <div class="form-field span-2">
+                <label for="bio">About me</label>
+                <textarea id="bio" rows="3" placeholder="A short introduction — your interests, goals, what you're excited about…"></textarea>
+              </div>
+              <div class="form-field">
+                <label for="linkedinUrl">LinkedIn URL</label>
+                <input type="url" id="linkedinUrl" placeholder="https://linkedin.com/in/you">
+              </div>
+              <div class="form-field">
+                <label for="githubUrl">GitHub URL</label>
+                <input type="url" id="githubUrl" placeholder="https://github.com/you">
+              </div>
+            </div>
+            <div class="form-actions">
+              <div class="form-note" id="profileNote"></div>
+              <button type="submit" class="btn-solid" id="profileSubmitBtn">Save Profile</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script>
+  const AVATAR_COLORS = ["#2F6FED", "#7C5CFC", "#16A34A", "#D97706", "#DC2626", "#0EA5E9"];
+  const session = requireSession("student");
+  let overviewData = null;
+
+  if (session) {
+    document.getElementById("userName").textContent = session.name;
+    document.getElementById("welcomeLine").textContent = `Welcome back, ${session.name.split(" ")[0]}!`;
+    document.getElementById("topAvatar").textContent = initials(session.name);
+    document.getElementById("topAvatar").style.background = avatarColor(session.name);
+    init();
+  }
+
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+  function avatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+  function pct(value) {
+    if (value === null || value === undefined) return "—";
+    return (value * 100).toFixed(1) + "%";
+  }
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    return new Date(iso).toLocaleDateString(undefined, { month: "short", day: "numeric", year: "numeric" });
+  }
+
+  const userMenuTrigger = document.getElementById("userMenuTrigger");
+  const userMenuDropdown = document.getElementById("userMenuDropdown");
+  userMenuTrigger.addEventListener("click", (e) => { e.stopPropagation(); userMenuDropdown.classList.toggle("open"); });
+  document.addEventListener("click", () => userMenuDropdown.classList.remove("open"));
+
+  // --- Tabs ---
+  document.querySelectorAll(".tab-btn").forEach(btn => {
+    btn.addEventListener("click", () => switchTab(btn.dataset.tab));
+  });
+  document.querySelectorAll("[data-tab-link]").forEach(a => {
+    a.addEventListener("click", (e) => { e.preventDefault(); switchTab(a.dataset.tabLink); });
+  });
+  function switchTab(tab) {
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === tab));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === `panel-${tab}`));
+  }
+
+  async function init() {
+    await loadOverview();
+    document.getElementById("loadingNote").style.display = "none";
+    await Promise.all([loadReports(), loadProjects()]);
+  }
+
+  // --- Overview ---
+  async function loadOverview() {
+    try {
+      const res = await apiFetch("/student/overview");
+      if (!res.ok) throw new Error("Couldn't load your dashboard.");
+      overviewData = await res.json();
+      renderKpis();
+      renderAttendance();
+      renderTasks();
+      renderSuggestions();
+      populateProfileForm();
+    } catch (err) {
+      document.getElementById("kpiRow").innerHTML = `<p class="loading-note">${err.message}</p>`;
+    }
+  }
+
+  function renderKpis() {
+    const p = overviewData.predictions;
+    const trendMap = { improving: "▲ Improving", stable: "▬ Stable", declining: "▼ Declining" };
+    const trendTone = { improving: "green", stable: "", declining: "red" };
+    document.getElementById("kpiRow").innerHTML = `
+      <div class="kpi-card ${p.dropout_risk > 0.5 ? "red" : "green"} animate-in">
+        <div class="label">Dropout Risk</div>
+        <div class="value">${pct(p.dropout_risk)}</div>
+        <div class="caption">based on your recent activity</div>
+      </div>
+      <div class="kpi-card green animate-in">
+        <div class="label">Success Probability</div>
+        <div class="value">${pct(p.success_probability)}</div>
+        <div class="caption">predicted internship outcome</div>
+      </div>
+      <div class="kpi-card ${trendTone[p.performance_trend] || ""} animate-in">
+        <div class="label">Performance Trend</div>
+        <div class="value" style="font-size:19px;">${trendMap[p.performance_trend] || "—"}</div>
+        <div class="caption">vs. previous weeks</div>
+      </div>
+      <div class="kpi-card blue animate-in">
+        <div class="label">Attendance Streak</div>
+        <div class="value">${overviewData.attendance.current_streak_days}<span style="font-size:14px;"> days</span></div>
+        <div class="caption">consecutive days present</div>
+      </div>
+    `;
+  }
+
+  function renderAttendance() {
+    const marked = overviewData.attendance.marked_today;
+    document.getElementById("attendanceBox").innerHTML = `
+      <p style="font-size:13px;color:var(--subtle);margin:0 0 14px;">
+        ${marked ? "You're marked present for today. Nice work — keep the streak going." : "You haven't marked today's attendance yet."}
+      </p>
+      <button class="attendance-btn" id="markAttendanceBtn" ${marked ? "disabled" : ""}>
+        ${marked ? "✓ Marked Present Today" : "Mark Attendance →"}
+      </button>
+      <div class="streak-chip">🔥 ${overviewData.attendance.current_streak_days}-day streak</div>
+    `;
+    if (!marked) {
+      document.getElementById("markAttendanceBtn").addEventListener("click", markAttendance);
+    }
+  }
+
+  async function markAttendance() {
+    const btn = document.getElementById("markAttendanceBtn");
+    btn.disabled = true;
+    btn.textContent = "Marking…";
+    try {
+      const res = await apiFetch("/student/attendance/mark", { method: "POST" });
+      if (!res.ok) throw new Error();
+      await loadOverview();
+    } catch {
+      btn.disabled = false;
+      btn.textContent = "Mark Attendance →";
+    }
+  }
+
+  function renderTasks() {
+    const t = overviewData.tasks;
+    document.getElementById("taskBox").innerHTML = `
+      <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+        <span style="font-size:13px;color:var(--subtle);">Completed</span>
+        <span style="font-weight:700;">${t.completed} / ${t.total}</span>
+      </div>
+      <span class="bar-track" style="width:100%;"><span class="bar-fill green" style="width:${t.total ? (t.completed / t.total * 100) : 0}%;"></span></span>
+      <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;">
+        <span class="pill pill-green">${t.completed} completed</span>
+        <span class="pill pill-amber">${t.pending} pending</span>
+        <span class="pill pill-red">${t.late} late</span>
+      </div>
+    `;
+  }
+
+  function renderSuggestions() {
+    const s = overviewData.suggestions;
+    document.getElementById("suggestionsBox").innerHTML = s.length
+      ? s.map(r => `
+          <div class="rec-item">
+            <div class="rec-avatar" style="background:${avatarColor(session.name)}">${initials(session.name)}</div>
+            <div class="rec-body">
+              <div class="rec-name"><span class="pill pill-gray">${r.type.replace(/_/g, " ")}</span></div>
+              <div class="rec-message">${r.message}</div>
+            </div>
+          </div>
+        `).join("")
+      : `<div class="loading-note">No AI suggestions yet — check back after your next weekly report.</div>`;
+  }
+
+  // --- Weekly Reports ---
+  document.getElementById("reportForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const note = document.getElementById("reportNote");
+    const btn = document.getElementById("reportSubmitBtn");
+    note.className = "form-note";
+    btn.disabled = true; btn.textContent = "Submitting…";
+    try {
+      const res = await apiFetch("/student/weekly-report", {
+        method: "POST",
+        body: JSON.stringify({
+          week_start_date: document.getElementById("weekStart").value,
+          hours_worked: document.getElementById("hoursWorked").value ? parseFloat(document.getElementById("hoursWorked").value) : null,
+          summary: document.getElementById("summary").value,
+          challenges: document.getElementById("challenges").value || null,
+        }),
+      });
+      if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.detail || "Couldn't submit report."); }
+      note.textContent = "Report submitted!"; note.className = "form-note success";
+      document.getElementById("reportForm").reset();
+      loadReports();
+    } catch (err) {
+      note.textContent = err.message; note.className = "form-note error";
+    } finally {
+      btn.disabled = false; btn.textContent = "Submit Report";
+    }
+  });
+
+  async function loadReports() {
+    try {
+      const res = await apiFetch("/student/weekly-reports");
+      const reports = res.ok ? await res.json() : [];
+      document.getElementById("reportsList").innerHTML = reports.length
+        ? reports.map(r => `
+            <div class="list-item-card">
+              <div class="item-top">
+                <span class="item-title">Week of ${fmtDate(r.week_start_date)}</span>
+                <span class="item-date">${r.hours_worked ? r.hours_worked + " hrs" : ""}</span>
+              </div>
+              <div class="item-body">${r.summary}</div>
+              ${r.challenges ? `<div class="item-body" style="color:var(--subtle);margin-top:6px;"><strong>Challenges:</strong> ${r.challenges}</div>` : ""}
+            </div>
+          `).join("")
+        : `<div class="loading-note">No weekly reports submitted yet.</div>`;
+    } catch {
+      document.getElementById("reportsList").innerHTML = `<div class="loading-note">Couldn't load report history.</div>`;
+    }
+  }
+
+  // --- Projects ---
+  document.getElementById("projectForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const note = document.getElementById("projectNote");
+    const btn = document.getElementById("projectSubmitBtn");
+    note.className = "form-note";
+    btn.disabled = true; btn.textContent = "Submitting…";
+    try {
+      const res = await apiFetch("/student/project", {
+        method: "POST",
+        body: JSON.stringify({
+          title: document.getElementById("projTitle").value,
+          repo_url: document.getElementById("repoUrl").value,
+          demo_url: document.getElementById("demoUrl").value || null,
+          description: document.getElementById("projDescription").value || null,
+        }),
+      });
+      if (!res.ok) { const b = await res.json().catch(() => ({})); throw new Error(b.detail || "Couldn't submit project."); }
+      note.textContent = "Project submitted — your mentor can now see it!"; note.className = "form-note success";
+      document.getElementById("projectForm").reset();
+      loadProjects();
+    } catch (err) {
+      note.textContent = err.message; note.className = "form-note error";
+    } finally {
+      btn.disabled = false; btn.textContent = "Submit Project";
+    }
+  });
+
+  async function loadProjects() {
+    try {
+      const res = await apiFetch("/student/projects");
+      const projects = res.ok ? await res.json() : [];
+      document.getElementById("projectsList").innerHTML = projects.length
+        ? projects.map(p => `
+            <div class="list-item-card">
+              <div class="item-top">
+                <span class="item-title">${p.title}</span>
+                <span class="item-date">${fmtDate(p.submitted_at)}</span>
+              </div>
+              ${p.description ? `<div class="item-body" style="margin-bottom:8px;">${p.description}</div>` : ""}
+              <div style="display:flex;gap:16px;">
+                <a class="item-link" href="${p.repo_url}" target="_blank" rel="noopener">📦 Repository</a>
+                ${p.demo_url ? `<a class="item-link" href="${p.demo_url}" target="_blank" rel="noopener">🔗 Live Demo</a>` : ""}
+              </div>
+            </div>
+          `).join("")
+        : `<div class="loading-note">No projects submitted yet.</div>`;
+    } catch {
+      document.getElementById("projectsList").innerHTML = `<div class="loading-note">Couldn't load project history.</div>`;
+    }
+  }
+
+  // --- Profile ---
+  function populateProfileForm() {
+    const p = overviewData.profile;
+    document.getElementById("phone").value = p.phone || "";
+    document.getElementById("education").value = p.education || "";
+    document.getElementById("skills").value = p.skills || "";
+    document.getElementById("bio").value = p.bio || "";
+    document.getElementById("linkedinUrl").value = p.linkedin_url || "";
+    document.getElementById("githubUrl").value = p.github_url || "";
+  }
+
+  document.getElementById("profileForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const note = document.getElementById("profileNote");
+    const btn = document.getElementById("profileSubmitBtn");
+    note.className = "form-note";
+    btn.disabled = true; btn.textContent = "Saving…";
+    try {
+      const res = await apiFetch("/student/profile", {
+        method: "PATCH",
+        body: JSON.stringify({
+          phone: document.getElementById("phone").value || null,
+          education: document.getElementById("education").value || null,
+          skills: document.getElementById("skills").value || null,
+          bio: document.getElementById("bio").value || null,
+          linkedin_url: document.getElementById("linkedinUrl").value || null,
+          github_url: document.getElementById("githubUrl").value || null,
+        }),
+      });
+      if (!res.ok) throw new Error("Couldn't save profile.");
+      note.textContent = "Profile saved!"; note.className = "form-note success";
+      await loadOverview();
+    } catch (err) {
+      note.textContent = err.message; note.className = "form-note error";
+    } finally {
+      btn.disabled = false; btn.textContent = "Save Profile";
+    }
+  });
+</script>
+</body>
+</html>

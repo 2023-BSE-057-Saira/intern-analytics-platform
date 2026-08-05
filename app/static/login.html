@@ -176,6 +176,44 @@
     font-size: 12.5px;
     text-align: center;
   }
+
+  .auth-tabs {
+    display: flex;
+    background: #F1F3F9;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 24px;
+  }
+  .auth-tab {
+    flex: 1;
+    border: none;
+    background: none;
+    padding: 9px 10px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--subtle);
+  }
+  .auth-tab.active { background: white; color: var(--ink); box-shadow: 0 1px 3px rgba(11,27,63,0.1); }
+
+  .signup-form { display: none; }
+  .signup-form.active { display: block; }
+  #loginForm.hidden { display: none; }
+
+  .form-row-2 { display: flex; gap: 10px; }
+  .form-row-2 .field { flex: 1; }
+
+  .login-card select {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    font-size: 14.5px;
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: white;
+  }
+  .login-card select:focus { outline: none; border-color: var(--blue); box-shadow: 0 0 0 3px rgba(47,111,237,0.12); }
 </style>
 </head>
 <body>
@@ -187,8 +225,13 @@
   <div>
     <div class="login-card">
       <div class="avatar-ring"><div class="icon-circle">🔒</div></div>
-      <h2>Welcome back</h2>
-      <p class="subhead">Sign in to continue to your dashboard.</p>
+      <h2 id="cardTitle">Welcome back</h2>
+      <p class="subhead" id="cardSubhead">Sign in to continue to your dashboard.</p>
+
+      <div class="auth-tabs">
+        <button type="button" class="auth-tab active" id="tabSignIn">Sign In</button>
+        <button type="button" class="auth-tab" id="tabSignUp">Create Student Account</button>
+      </div>
 
       <div class="error-box" id="errorBox"></div>
 
@@ -207,7 +250,52 @@
             <input type="password" id="password" name="password" autocomplete="current-password" required>
           </div>
         </div>
-        <button type="submit" class="submit-btn" id="submitBtn">Sign in →</button>
+        <button type="submit" class="submit-btn" id="submitBtn">Sign in</button>
+      </form>
+
+      <form id="signupForm" class="signup-form">
+        <div class="field">
+          <label for="su-name">Full Name</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">👤</span>
+            <input type="text" id="su-name" autocomplete="name" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="su-email">Email</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">✉️</span>
+            <input type="email" id="su-email" autocomplete="username" required>
+          </div>
+        </div>
+        <div class="field">
+          <label for="su-password">Password</label>
+          <div class="field-input-wrap">
+            <span class="field-icon">🔑</span>
+            <input type="password" id="su-password" autocomplete="new-password" minlength="6" required>
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div class="field">
+            <label for="su-technology">Technology</label>
+            <select id="su-technology" required>
+              <option value="Laravel">Laravel</option>
+              <option value="MERN Stack">MERN Stack</option>
+              <option value="AI">Artificial Intelligence</option>
+              <option value="Flutter">Flutter</option>
+              <option value="UI/UX">UI/UX</option>
+              <option value="DevOps">DevOps</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="su-batch">Batch <span style="font-weight:400; color:var(--subtle);">(optional)</span></label>
+            <div class="field-input-wrap">
+              <input type="text" id="su-batch" placeholder="e.g. 2026-A" style="padding-left:14px;">
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="submit-btn" id="signupBtn">Create account →</button>
       </form>
 
       <a href="/" class="back-link">&larr; Back to home</a>
@@ -237,8 +325,29 @@
   if (existing && existing.access_token) redirectToDashboard(existing.role);
 
   const form = document.getElementById("loginForm");
+  const signupForm = document.getElementById("signupForm");
   const errorBox = document.getElementById("errorBox");
   const submitBtn = document.getElementById("submitBtn");
+  const signupBtn = document.getElementById("signupBtn");
+  const tabSignIn = document.getElementById("tabSignIn");
+  const tabSignUp = document.getElementById("tabSignUp");
+  const cardTitle = document.getElementById("cardTitle");
+  const cardSubhead = document.getElementById("cardSubhead");
+
+  function showTab(tab) {
+    errorBox.classList.remove("visible");
+    const isSignIn = tab === "signin";
+    tabSignIn.classList.toggle("active", isSignIn);
+    tabSignUp.classList.toggle("active", !isSignIn);
+    form.classList.toggle("hidden", !isSignIn);
+    signupForm.classList.toggle("active", !isSignIn);
+    cardTitle.textContent = isSignIn ? "Welcome back" : "Join as a student";
+    cardSubhead.textContent = isSignIn
+      ? "Sign in to continue to your dashboard."
+      : "Set up your account — you'll be added to the platform instantly.";
+  }
+  tabSignIn.addEventListener("click", () => showTab("signin"));
+  tabSignUp.addEventListener("click", () => showTab("signup"));
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -257,6 +366,31 @@
       errorBox.classList.add("visible");
       submitBtn.disabled = false;
       submitBtn.textContent = "Sign in →";
+    }
+  });
+
+  signupForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    errorBox.classList.remove("visible");
+    signupBtn.disabled = true;
+    signupBtn.textContent = "Creating account...";
+
+    const payload = {
+      name: document.getElementById("su-name").value.trim(),
+      email: document.getElementById("su-email").value.trim(),
+      password: document.getElementById("su-password").value,
+      technology: document.getElementById("su-technology").value,
+      batch: document.getElementById("su-batch").value.trim() || null,
+    };
+
+    try {
+      const session = await registerStudent(payload);
+      redirectToDashboard(session.role);
+    } catch (err) {
+      errorBox.textContent = err.message;
+      errorBox.classList.add("visible");
+      signupBtn.disabled = false;
+      signupBtn.textContent = "Create account →";
     }
   });
 </script>

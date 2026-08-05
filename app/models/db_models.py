@@ -35,6 +35,16 @@ class Intern(Base):
     expected_end_date = Column(Date)
     status = Column(String(20), default="active")
 
+    # Self-service profile fields, filled in by the student via
+    # /student/profile after they register and log in.
+    phone = Column(String(30))
+    education = Column(String(200))
+    skills = Column(Text)  # comma-separated, kept simple on purpose
+    bio = Column(Text)
+    linkedin_url = Column(String(255))
+    github_url = Column(String(255))
+    avatar_color = Column(String(20))
+
     mentor = relationship("Mentor", back_populates="interns")
 
 
@@ -125,6 +135,30 @@ class Recommendation(Base):
     recommendation_type = Column(String(50))
     message = Column(Text)
     created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class WeeklyReport(Base):
+    __tablename__ = "weekly_reports"
+
+    report_id = Column(Integer, primary_key=True, index=True)
+    intern_id = Column(Integer, ForeignKey("interns.intern_id"))
+    week_start_date = Column(Date, nullable=False)
+    hours_worked = Column(Numeric(5, 2))
+    summary = Column(Text, nullable=False)
+    challenges = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+
+
+class ProjectSubmission(Base):
+    __tablename__ = "project_submissions"
+
+    submission_id = Column(Integer, primary_key=True, index=True)
+    intern_id = Column(Integer, ForeignKey("interns.intern_id"))
+    title = Column(String(200), nullable=False)
+    description = Column(Text)
+    repo_url = Column(String(500), nullable=False)
+    demo_url = Column(String(500))
+    submitted_at = Column(TIMESTAMP, server_default=func.now())
 
 # Add this class to app/models/db_models.py (anywhere after Mentor/Intern
 # are defined, since it references both).
