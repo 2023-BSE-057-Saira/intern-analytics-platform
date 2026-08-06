@@ -281,11 +281,10 @@
             <select id="su-technology" required>
               <option value="Laravel">Laravel</option>
               <option value="MERN Stack">MERN Stack</option>
-              <option value="AI">Artificial Intelligence</option>
+              <option value="Artificial Intelligence">Artificial Intelligence</option>
               <option value="Flutter">Flutter</option>
               <option value="UI/UX">UI/UX</option>
               <option value="DevOps">DevOps</option>
-              <option value="Other">Other</option>
             </select>
           </div>
           <div class="field">
@@ -384,7 +383,9 @@
     };
 
     try {
-      const session = await registerStudent(payload);
+      const session = await register(
+        payload.name, payload.email, payload.password, payload.technology, payload.batch
+      );
       redirectToDashboard(session.role);
     } catch (err) {
       errorBox.textContent = err.message;
