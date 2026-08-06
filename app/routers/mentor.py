@@ -9,13 +9,19 @@ parameter, so a mentor can never view another mentor's dashboard by
 editing the URL.
 """
 from collections import defaultdict
+from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from app.database import get_db
 from app.models.db_models import Intern, Mentor, Prediction, Recommendation, WeeklyReport, ProjectSubmission
 from app.security import require_role
+
+
+class ReviewAction(BaseModel):
+    comment: str | None = None
 
 router = APIRouter(prefix="/mentor", tags=["Mentor"])
 
@@ -44,12 +50,18 @@ def _latest_predictions_by_intern(db: Session, intern_ids: list) -> dict:
             latest[key] = p
 
     by_intern = defaultdict(dict)
+    last_predicted = {}
     for (intern_id, ptype), pred in latest.items():
         by_intern[intern_id][ptype] = float(pred.predicted_value)
         if ptype == "performance_trend" and pred.explanation_json:
             label = pred.explanation_json.get("predicted_label")
             if label:
                 by_intern[intern_id]["performance_trend_label"] = label
+        current = last_predicted.get(intern_id)
+        if current is None or pred.created_at > current:
+            last_predicted[intern_id] = pred.created_at
+    for intern_id, ts in last_predicted.items():
+        by_intern[intern_id]["last_predicted_at"] = ts.isoformat() if ts else None
     return by_intern
 
 
@@ -63,6 +75,7 @@ def _intern_summary(intern: Intern, preds: dict) -> dict:
         "dropout_risk": preds.get("dropout_risk"),
         "success_probability": preds.get("success_probability"),
         "performance_trend": preds.get("performance_trend_label"),
+        "last_predicted_at": preds.get("last_predicted_at"),
     }
 
 
@@ -98,6 +111,17 @@ def get_mentor_overview(db: Session = Depends(get_db),
     utilization_pct = round(100 * active_count / capacity, 1) if capacity else None
     overloaded = active_count > capacity if capacity else False
 
+    pending_reviews_count = 0
+    if intern_ids:
+        pending_reviews_count = (
+            db.query(WeeklyReport)
+            .filter(WeeklyReport.intern_id.in_(intern_ids), WeeklyReport.reviewed.is_(False))
+            .count()
+            + db.query(ProjectSubmission)
+            .filter(ProjectSubmission.intern_id.in_(intern_ids), ProjectSubmission.reviewed.is_(False))
+            .count()
+        )
+
     # --- Weekly AI suggestions: most recent recommendation per intern ---
     suggestions = []
     if intern_ids:
@@ -128,6 +152,7 @@ def get_mentor_overview(db: Session = Depends(get_db),
             "max_capacity": capacity,
             "utilization_pct": utilization_pct,
             "overloaded": overloaded,
+            "pending_reviews_count": pending_reviews_count,
         },
         "roster": summaries,
         "weak_students": weak_students,
@@ -199,3 +224,139 @@ def get_mentor_projects(db: Session = Depends(get_db),
         }
         for s in subs
     ]
+
+
+# --- Pending Reviews ---------------------------------------------------------
+@router.get("/reviews")
+def get_pending_reviews(db: Session = Depends(get_db),
+                         current_user=Depends(require_role("mentor"))):
+    """Unreviewed weekly reports + project submissions across the
+    mentor's own roster, newest first. Backs the Pending Reviews
+    section on the dashboard."""
+    intern_ids = _own_intern_ids(db, current_user)
+    if not intern_ids:
+        return {"weekly_reports": [], "project_submissions": []}
+
+    names = {i.intern_id: i.name for i in db.query(Intern).filter(Intern.intern_id.in_(intern_ids)).all()}
+
+    reports = (
+        db.query(WeeklyReport)
+        .filter(WeeklyReport.intern_id.in_(intern_ids), WeeklyReport.reviewed.is_(False))
+        .order_by(WeeklyReport.week_start_date.desc())
+        .all()
+    )
+    subs = (
+        db.query(ProjectSubmission)
+        .filter(ProjectSubmission.intern_id.in_(intern_ids), ProjectSubmission.reviewed.is_(False))
+        .order_by(ProjectSubmission.submitted_at.desc())
+        .all()
+    )
+    return {
+        "weekly_reports": [
+            {
+                "report_id": r.report_id,
+                "intern_id": r.intern_id,
+                "intern_name": names.get(r.intern_id, "—"),
+                "week_start_date": r.week_start_date.isoformat(),
+                "summary": r.summary,
+                "challenges": r.challenges,
+            }
+            for r in reports
+        ],
+        "project_submissions": [
+            {
+                "submission_id": s.submission_id,
+                "intern_id": s.intern_id,
+                "intern_name": names.get(s.intern_id, "—"),
+                "title": s.title,
+                "repo_url": s.repo_url,
+                "submitted_at": s.submitted_at.isoformat(),
+            }
+            for s in subs
+        ],
+    }
+
+
+def _own_weekly_report_or_404(db: Session, current_user, report_id: int) -> WeeklyReport:
+    report = db.query(WeeklyReport).filter(WeeklyReport.report_id == report_id).first()
+    if not report or report.intern_id not in _own_intern_ids(db, current_user):
+        raise HTTPException(status_code=404, detail="Weekly report not found")
+    return report
+
+
+def _own_submission_or_404(db: Session, current_user, submission_id: int) -> ProjectSubmission:
+    sub = db.query(ProjectSubmission).filter(ProjectSubmission.submission_id == submission_id).first()
+    if not sub or sub.intern_id not in _own_intern_ids(db, current_user):
+        raise HTTPException(status_code=404, detail="Project submission not found")
+    return sub
+
+
+@router.patch("/reviews/weekly-report/{report_id}")
+def review_weekly_report(report_id: int, action: ReviewAction, db: Session = Depends(get_db),
+                          current_user=Depends(require_role("mentor"))):
+    report = _own_weekly_report_or_404(db, current_user, report_id)
+    report.reviewed = True
+    report.mentor_comment = action.comment
+    report.reviewed_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"status": "reviewed", "report_id": report_id}
+
+
+@router.patch("/reviews/project-submission/{submission_id}")
+def review_project_submission(submission_id: int, action: ReviewAction, db: Session = Depends(get_db),
+                               current_user=Depends(require_role("mentor"))):
+    sub = _own_submission_or_404(db, current_user, submission_id)
+    sub.reviewed = True
+    sub.mentor_comment = action.comment
+    sub.reviewed_at = datetime.now(timezone.utc)
+    db.commit()
+    return {"status": "reviewed", "submission_id": submission_id}
+
+
+# --- Risk Alerts ---------------------------------------------------------------
+@router.get("/risk-alerts")
+def get_risk_alerts(db: Session = Depends(get_db),
+                     current_user=Depends(require_role("mentor"))):
+    """Severity-tiered dropout-risk list for the mentor's own active
+    interns — backs the Risk Alerts page (previously a dead nav link)."""
+    intern_ids = _own_intern_ids(db, current_user)
+    if not intern_ids:
+        return []
+
+    interns = {
+        i.intern_id: i
+        for i in db.query(Intern).filter(Intern.intern_id.in_(intern_ids), Intern.status == "active").all()
+    }
+    if not interns:
+        return []
+
+    preds_by_intern = _latest_predictions_by_intern(db, list(interns.keys()))
+
+    alerts = []
+    for intern_id, intern in interns.items():
+        preds = preds_by_intern.get(intern_id, {})
+        risk = preds.get("dropout_risk")
+        trend = preds.get("performance_trend_label")
+        if risk is None:
+            continue
+        if risk > 0.7:
+            severity = "critical"
+        elif risk > 0.5:
+            severity = "high"
+        elif risk > 0.3:
+            severity = "moderate"
+        else:
+            continue  # not worth alerting on
+        alerts.append({
+            "intern_id": intern_id,
+            "name": intern.name,
+            "technology": intern.technology,
+            "dropout_risk": risk,
+            "performance_trend": trend,
+            "severity": severity,
+            "last_predicted_at": preds.get("last_predicted_at"),
+        })
+
+    severity_order = {"critical": 0, "high": 1, "moderate": 2}
+    alerts.sort(key=lambda a: (severity_order[a["severity"]], -a["dropout_risk"]))
+    return alerts

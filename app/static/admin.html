@@ -170,10 +170,10 @@
   }
 
   function nameCell(r) {
-    return `<div class="avatar-cell">
+    return `<a href="/intern/${r.intern_id}" class="avatar-cell" style="text-decoration:none; color:inherit;">
       <div class="avatar-circle" style="background:${avatarColor(r.name)}">${initials(r.name)}</div>
       <span>${r.name || "—"}</span>
-    </div>`;
+    </a>`;
   }
 
   function riskPill(value) {
@@ -233,10 +233,14 @@
   function applyGlobalFilter(q) {
     const filterFn = r => !q || (r.name || "").toLowerCase().includes(q) ||
       (r.technology || "").toLowerCase().includes(q) || (r.batch || "").toLowerCase().includes(q);
+    const highRiskEmpty = q ? "No students match your search."
+      : "No students currently flagged cohort-wide. An intern appears here once their dropout risk exceeds 50% or their trend is declining.";
+    const topPerformerEmpty = q ? "No students match your search."
+      : "No students currently qualify. An intern appears here once their predicted success probability exceeds 85%.";
     renderCappedCard("highRiskContainer", cachedHighRisk.filter(filterFn), highRiskCols,
-      "No students match.", () => highRiskExpanded, toggleHighRisk, "High-Risk Students");
+      highRiskEmpty, () => highRiskExpanded, toggleHighRisk, "High-Risk Students");
     renderCappedCard("topPerformerContainer", cachedTopPerformers.filter(filterFn), topPerformerCols,
-      "No students match.", () => topPerformerExpanded, toggleTopPerformer, "Top Performers");
+      topPerformerEmpty, () => topPerformerExpanded, toggleTopPerformer, "Top Performers");
   }
 
   function toggleHighRisk() {

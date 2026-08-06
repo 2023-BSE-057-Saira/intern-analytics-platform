@@ -132,6 +132,9 @@ CREATE TABLE IF NOT EXISTS weekly_reports (
     summary           TEXT NOT NULL,
     challenges        TEXT,
     created_at        TIMESTAMP DEFAULT NOW(),
+    reviewed          BOOLEAN DEFAULT FALSE,
+    mentor_comment    TEXT,
+    reviewed_at       TIMESTAMP,
     UNIQUE(intern_id, week_start_date)
 );
 
@@ -144,7 +147,10 @@ CREATE TABLE IF NOT EXISTS project_submissions (
     description        TEXT,
     repo_url           VARCHAR(500) NOT NULL,
     demo_url           VARCHAR(500),
-    submitted_at       TIMESTAMP DEFAULT NOW()
+    submitted_at       TIMESTAMP DEFAULT NOW(),
+    reviewed           BOOLEAN DEFAULT FALSE,
+    mentor_comment     TEXT,
+    reviewed_at        TIMESTAMP
 );
 
 -- Helpful indexes

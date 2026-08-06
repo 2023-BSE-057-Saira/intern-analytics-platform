@@ -147,6 +147,9 @@ class WeeklyReport(Base):
     summary = Column(Text, nullable=False)
     challenges = Column(Text)
     created_at = Column(TIMESTAMP, server_default=func.now())
+    reviewed = Column(Boolean, default=False)
+    mentor_comment = Column(Text)
+    reviewed_at = Column(TIMESTAMP)
 
 
 class ProjectSubmission(Base):
@@ -159,6 +162,9 @@ class ProjectSubmission(Base):
     repo_url = Column(String(500), nullable=False)
     demo_url = Column(String(500))
     submitted_at = Column(TIMESTAMP, server_default=func.now())
+    reviewed = Column(Boolean, default=False)
+    mentor_comment = Column(Text)
+    reviewed_at = Column(TIMESTAMP)
 
 # Add this class to app/models/db_models.py (anywhere after Mentor/Intern
 # are defined, since it references both).

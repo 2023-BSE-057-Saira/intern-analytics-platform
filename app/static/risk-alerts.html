@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Risk Alerts · Ezitech Institute</title>
+<link rel="stylesheet" href="/static/css/base.css">
+<link rel="stylesheet" href="/static/css/dashboard.css">
+<style>
+  .alert-card {
+    display: flex; align-items: center; gap: 14px;
+    background: white; border: 1px solid var(--border); border-left: 4px solid var(--border);
+    border-radius: 12px; padding: 14px 18px; margin-bottom: 10px;
+  }
+  .alert-card.critical { border-left-color: var(--red); }
+  .alert-card.high { border-left-color: var(--amber); }
+  .alert-card.moderate { border-left-color: #94A3B8; }
+  .alert-severity-tag {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    padding: 4px 9px; border-radius: 999px; flex-shrink: 0;
+  }
+  .alert-severity-tag.critical { background: #FEE2E2; color: var(--red); }
+  .alert-severity-tag.high { background: #FEF3C7; color: var(--amber); }
+  .alert-severity-tag.moderate { background: #F1F5F9; color: #475569; }
+  .alert-body { flex: 1; min-width: 0; }
+  .alert-name { font-size: 14px; font-weight: 700; color: var(--ink); }
+  .alert-meta { font-size: 12px; color: var(--subtle); margin-top: 2px; }
+  .alert-risk { font-size: 20px; font-weight: 700; font-family: 'Poppins', sans-serif; flex-shrink: 0; }
+  .alert-card.critical .alert-risk { color: var(--red); }
+  .alert-card.high .alert-risk { color: var(--amber); }
+  .alert-card.moderate .alert-risk { color: #475569; }
+  .alert-view-btn {
+    flex-shrink: 0; font-size: 12.5px; font-weight: 600; color: var(--blue);
+    border: 1px solid var(--border); background: white; padding: 7px 14px; border-radius: 8px; text-decoration: none;
+  }
+  .alert-view-btn:hover { border-color: var(--blue); }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+  <aside class="sidebar">
+    <div class="brand"><span class="dot"></span> EZITECH</div>
+
+    <a href="/mentor" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/></svg>
+      Dashboard
+    </a>
+
+    <div class="nav-section-label">Management</div>
+    <a href="/mentor#roster" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 8.2a3 3 0 1 1 3.6 4.4"/><path d="M15.5 14c2.8.3 5 2.3 5 5.5"/></svg>
+      My Interns
+    </a>
+    <a href="/mentor#recommendations" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Recommendations
+    </a>
+
+    <div class="nav-section-label">Analytics</div>
+    <a href="/mentor" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>
+      Overview
+    </a>
+    <a href="/risk-alerts" class="nav-item active">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4M12 17h.01"/></svg>
+      Risk Alerts
+    </a>
+
+    <div class="nav-section-label">Account</div>
+    <a href="/settings" class="nav-item">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 13.5a2 2 0 0 0 .4 2.2l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a2 2 0 0 0-2.2-.4 2 2 0 0 0-1.2 1.8V20a2 2 0 1 1-4 0v-.2a2 2 0 0 0-1.2-1.8 2 2 0 0 0-2.2.4l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a2 2 0 0 0 .4-2.2 2 2 0 0 0-1.8-1.2H2a2 2 0 1 1 0-4h.2a2 2 0 0 0 1.8-1.2 2 2 0 0 0-.4-2.2l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a2 2 0 0 0 2.2.4H9a2 2 0 0 0 1.2-1.8V2a2 2 0 1 1 4 0v.2a2 2 0 0 0 1.2 1.8 2 2 0 0 0 2.2-.4l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a2 2 0 0 0-.4 2.2v.1a2 2 0 0 0 1.8 1.2H22a2 2 0 1 1 0 4h-.2a2 2 0 0 0-1.8 1.2Z"/></svg>
+      Settings
+    </a>
+
+    <div class="help-card">
+      <h5>Need help?</h5>
+      <p>Ezitech Institute · AI-Powered Internship Performance & Risk Analytics Platform.</p>
+      <a href="mailto:info@ezitech.org">Contact Support</a>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <div class="top-search-bar">
+      <div></div>
+      <div class="top-user-area">
+        <div class="user-menu-wrap">
+          <button class="user-menu-trigger" id="userMenuTrigger">
+            <div class="avatar-circle" id="topAvatar" style="background:var(--blue)">M</div>
+            <div class="name-block">
+              <div class="name" id="userName">—</div>
+              <div class="role">Mentor</div>
+            </div>
+            <span class="chevron">▼</span>
+          </button>
+          <div class="user-menu-dropdown" id="userMenuDropdown">
+            <button onclick="logout()">Log out</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page-wrap">
+      <div class="page-banner">
+        <p class="eyebrow">Mentor</p>
+        <h1>Risk Alerts</h1>
+        <p>Active interns on your roster with a meaningful dropout-risk signal, most urgent first.</p>
+      </div>
+
+      <div id="content">
+        <div class="skeleton-table"><div class="skeleton-block"></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/auth.js"></script>
+<script>
+  const AVATAR_COLORS = ["#2F6FED", "#7C5CFC", "#16A34A", "#D97706", "#DC2626", "#0EA5E9"];
+  const session = requireSession("mentor");
+
+  if (session) {
+    document.getElementById("userName").textContent = session.name;
+    document.getElementById("topAvatar").textContent = initials(session.name);
+    document.getElementById("topAvatar").style.background = avatarColor(session.name);
+    loadAlerts();
+  }
+
+  const userMenuTrigger = document.getElementById("userMenuTrigger");
+  const userMenuDropdown = document.getElementById("userMenuDropdown");
+  userMenuTrigger.addEventListener("click", (e) => { e.stopPropagation(); userMenuDropdown.classList.toggle("open"); });
+  document.addEventListener("click", () => userMenuDropdown.classList.remove("open"));
+
+  function initials(name) {
+    if (!name) return "?";
+    const parts = name.trim().split(/\s+/);
+    return (parts[0][0] + (parts[1] ? parts[1][0] : "")).toUpperCase();
+  }
+  function avatarColor(name) {
+    if (!name) return AVATAR_COLORS[0];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length];
+  }
+  function trendLabel(label) {
+    const map = { improving: "▲ Improving", stable: "▬ Stable", declining: "▼ Declining" };
+    return map[label] || "trend unknown";
+  }
+
+  async function loadAlerts() {
+    try {
+      const res = await apiFetch("/mentor/risk-alerts");
+      if (!res.ok) throw new Error("Failed to load risk alerts.");
+      const alerts = await res.json();
+      render(alerts);
+    } catch (err) {
+      document.getElementById("content").innerHTML = `<p class="loading-note">${err.message}</p>`;
+    }
+  }
+
+  function render(alerts) {
+    if (!alerts.length) {
+      document.getElementById("content").innerHTML = `
+        <div class="data-card">
+          <div class="loading-note" style="padding:28px; text-align:center;">
+            No active interns are currently flagged. Alerts appear here once an active intern's
+            predicted dropout risk crosses 30% — nothing to act on right now.
+          </div>
+        </div>`;
+      return;
+    }
+    const counts = { critical: 0, high: 0, moderate: 0 };
+    alerts.forEach(a => counts[a.severity]++);
+
+    document.getElementById("content").innerHTML = `
+      <div class="kpi-row">
+        <div class="kpi-card red animate-in">
+          <div class="label">Critical (&gt;70%)</div>
+          <div class="value">${counts.critical}</div>
+        </div>
+        <div class="kpi-card amber animate-in">
+          <div class="label">High (50–70%)</div>
+          <div class="value">${counts.high}</div>
+        </div>
+        <div class="kpi-card animate-in">
+          <div class="label">Moderate (30–50%)</div>
+          <div class="value">${counts.moderate}</div>
+        </div>
+      </div>
+      <div class="section-title"><span class="dot"></span> Flagged Interns</div>
+      ${alerts.map(a => `
+        <div class="alert-card ${a.severity}">
+          <div class="avatar-circle" style="background:${avatarColor(a.name)}">${initials(a.name)}</div>
+          <div class="alert-body">
+            <div class="alert-name">${a.name}</div>
+            <div class="alert-meta">${a.technology} · ${trendLabel(a.performance_trend)}</div>
+          </div>
+          <span class="alert-severity-tag ${a.severity}">${a.severity}</span>
+          <div class="alert-risk">${(a.dropout_risk * 100).toFixed(1)}%</div>
+          <a class="alert-view-btn" href="/intern/${a.intern_id}">View →</a>
+        </div>
+      `).join("")}
+    `;
+  }
+</script>
+</body>
+</html>

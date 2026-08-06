@@ -63,10 +63,24 @@ def _get_intern_or_404(intern_id: int, db: Session) -> Intern:
     return intern
 
 
+def _get_owned_intern_or_404(intern_id: int, db: Session, current_user) -> Intern:
+    """Same as _get_intern_or_404, but also enforces that mentors only
+    touch their own roster and students only touch their own record.
+    Mirrors app/routers/interns.py's _assert_can_view."""
+    intern = _get_intern_or_404(intern_id, db)
+    if current_user.role == "admin":
+        return intern
+    if current_user.role == "mentor" and current_user.mentor_id == intern.mentor_id:
+        return intern
+    if current_user.role == "student" and current_user.intern_id == intern.intern_id:
+        return intern
+    raise HTTPException(status_code=403, detail="Not authorized for this intern")
+
+
 @router.post("/dropout-risk", response_model=PredictionOut)
 def get_dropout_risk(req: PredictionRequest, db: Session = Depends(get_db),
                       current_user=Depends(require_role("admin", "mentor", "student"))):
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_dropout_risk(intern_id=req.intern_id, db=db)
     return _save_and_respond(req.intern_id, "dropout_risk", result, db)
 
@@ -74,7 +88,7 @@ def get_dropout_risk(req: PredictionRequest, db: Session = Depends(get_db),
 @router.post("/performance-trend", response_model=PredictionOut)
 def get_performance_trend(req: PredictionRequest, db: Session = Depends(get_db),
                            current_user=Depends(require_role("admin", "mentor", "student"))):
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_performance_trend(intern_id=req.intern_id, db=db)
     return _save_and_respond(req.intern_id, "performance_trend", result, db)
 
@@ -82,7 +96,7 @@ def get_performance_trend(req: PredictionRequest, db: Session = Depends(get_db),
 @router.post("/success-probability", response_model=PredictionOut)
 def get_success_probability(req: PredictionRequest, db: Session = Depends(get_db),
                              current_user=Depends(require_role("admin", "mentor", "student"))):
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_success_probability(intern_id=req.intern_id, db=db)
     return _save_and_respond(req.intern_id, "success_probability", result, db)
 
@@ -91,7 +105,7 @@ def get_success_probability(req: PredictionRequest, db: Session = Depends(get_db
 def get_learning_growth(req: PredictionRequest, db: Session = Depends(get_db),
                          current_user=Depends(require_role("admin", "mentor", "student"))):
     """Saves BOTH learning_speed and skill_growth as separate prediction rows."""
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_learning_growth(intern_id=req.intern_id, db=db)
 
     # Save skill_growth as its own row too, so it appears as its own
@@ -114,7 +128,7 @@ def get_learning_growth(req: PredictionRequest, db: Session = Depends(get_db),
 def get_completion_probability(req: PredictionRequest, db: Session = Depends(get_db),
                                 current_user=Depends(require_role("admin", "mentor", "student"))):
     """Derived: 1 - dropout_risk. No separate model - just math on an existing prediction."""
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_completion_probability(intern_id=req.intern_id, db=db)
     return _save_and_respond(req.intern_id, "completion_probability", result, db)
 
@@ -123,7 +137,7 @@ def get_completion_probability(req: PredictionRequest, db: Session = Depends(get
 def get_project_success_probability(req: PredictionRequest, db: Session = Depends(get_db),
                                      current_user=Depends(require_role("admin", "mentor", "student"))):
     """Reuses the Success Probability model - documented approximation (see predict.py)."""
-    _get_intern_or_404(req.intern_id, db)
+    _get_owned_intern_or_404(req.intern_id, db, current_user)
     result = predict_project_success_probability(intern_id=req.intern_id, db=db)
     return _save_and_respond(req.intern_id, "project_success_probability", result, db)
 
@@ -164,6 +178,7 @@ def get_mentor_workload(db: Session = Depends(get_db),
 @router.get("/history/{intern_id}", response_model=list[PredictionOut])
 def prediction_history(intern_id: int, db: Session = Depends(get_db),
                         current_user=Depends(require_role("admin", "mentor", "student"))):
+    _get_owned_intern_or_404(intern_id, db, current_user)
     records = db.query(Prediction).filter(Prediction.intern_id == intern_id).all()
     return [
         PredictionOut(

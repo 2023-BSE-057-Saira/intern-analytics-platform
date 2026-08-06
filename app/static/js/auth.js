@@ -31,8 +31,10 @@ function logout() {
 
 /**
  * Call this at the top of every dashboard page's script.
- * requiredRole: "admin" | "mentor" | "student"
- * Redirects to /login if there's no session or the wrong role.
+ * requiredRole: "admin" | "mentor" | "student" | ["admin", "mentor", "student"]
+ * Pass an array for pages shared across roles (e.g. the intern detail
+ * page, which admins, mentors, and students can all open).
+ * Redirects to /login if there's no session or an unpermitted role.
  */
 function requireSession(requiredRole) {
   const session = getSession();
@@ -40,9 +42,10 @@ function requireSession(requiredRole) {
     window.location.href = "/login";
     return null;
   }
-  if (requiredRole && session.role !== requiredRole) {
-    // Logged in, but as the wrong role — send them to their own dashboard
-    // instead of silently showing nothing.
+  const allowedRoles = Array.isArray(requiredRole) ? requiredRole : (requiredRole ? [requiredRole] : null);
+  if (allowedRoles && !allowedRoles.includes(session.role)) {
+    // Logged in, but as a role that isn't permitted here — send them
+    // to their own dashboard instead of silently showing nothing.
     window.location.href = `/${session.role}`;
     return null;
   }

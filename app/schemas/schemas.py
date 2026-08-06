@@ -167,3 +167,22 @@ class InternUpdate(BaseModel):
     batch: Optional[str] = None
     status: Optional[str] = None
     expected_end_date: Optional[date] = None
+
+
+# --- Tasks --------------------------------------------------------------------
+class TaskOut(BaseModel):
+    task_id: int
+    intern_id: int
+    task_name: str
+    assigned_date: date
+    due_date: Optional[date] = None
+    completed_date: Optional[date] = None
+    status: str
+    difficulty: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class TaskStatusUpdate(BaseModel):
+    status: str

@@ -9,7 +9,7 @@ from fastapi.responses import FileResponse
 from prometheus_fastapi_instrumentator import Instrumentator
 
 from app.database import Base, engine
-from app.routers import admin, auth, interns, mentor, predictions, recommendations, student
+from app.routers import admin, auth, interns, mentor, predictions, recommendations, students
 
 
 Base.metadata.create_all(bind=engine)
@@ -34,7 +34,7 @@ app.include_router(interns.router)
 app.include_router(predictions.router)
 app.include_router(recommendations.router)
 app.include_router(mentor.router)
-app.include_router(student.router)
+app.include_router(students.router)
 
 Instrumentator().instrument(app).expose(app)
 
@@ -61,7 +61,10 @@ def serve_admin():
 
 @app.get("/register")
 def serve_register():
-    return FileResponse("app/static/register.html")
+    # No separate register.html — the signup flow lives as a tab
+    # inside login.html (Sign In / Create Student Account). This route
+    # just gives it a friendlier landing-page link.
+    return FileResponse("app/static/login.html")
 
 
 @app.get("/mentor")
@@ -77,6 +80,21 @@ def serve_student():
 @app.get("/settings")
 def serve_settings():
     return FileResponse("app/static/settings.html")
+
+
+@app.get("/intern/{intern_id}")
+def serve_intern_detail(intern_id: int):
+    return FileResponse("app/static/intern-detail.html")
+
+
+@app.get("/risk-alerts")
+def serve_mentor_risk_alerts():
+    # NOTE: intentionally NOT /mentor/risk-alerts — that path is already
+    # claimed by the mentor API router's GET /mentor/risk-alerts (JSON
+    # endpoint), registered earlier in this file. Routes are matched in
+    # registration order, so reusing that path here would silently
+    # shadow one of the two and break it.
+    return FileResponse("app/static/risk-alerts.html")
 
 
 @app.get("/health", tags=["Health"])

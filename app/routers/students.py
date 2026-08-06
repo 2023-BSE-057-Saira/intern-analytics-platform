@@ -2,14 +2,14 @@
 app/routers/students.py
 ==========================
 Self-service endpoints for the Student dashboard - profile editing,
-task tracking, and an aggregated "my dashboard" view.
+task tracking, daily attendance check-in, weekly reports, project
+submissions, and an aggregated "my dashboard" view.
 
 Every endpoint here is scoped through current_user.intern_id (pulled
 from the JWT), never from a URL parameter, so a student can only ever
 read or edit their own record - the same pattern used in
 app/routers/mentor.py for mentor-scoped data.
 """
-from collections import defaultdict
 from datetime import date
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -19,8 +19,13 @@ from app.database import get_db
 from app.models.db_models import (
     Intern, Mentor, Task, Attendance, GithubActivity,
     CommunicationActivity, Prediction, Recommendation,
+    WeeklyReport, ProjectSubmission,
 )
-from app.schemas.schemas import StudentProfileUpdate, TaskOut, TaskStatusUpdate
+from app.schemas.schemas import (
+    InternProfileOut, InternProfileUpdate, TaskOut, TaskStatusUpdate,
+    AttendanceOut, WeeklyReportCreate, WeeklyReportOut,
+    ProjectSubmissionCreate, ProjectSubmissionOut,
+)
 from app.security import require_role
 
 router = APIRouter(prefix="/students/me", tags=["Students"])
@@ -37,54 +42,26 @@ def _get_own_intern(current_user, db: Session) -> Intern:
 
 # --- Profile ----------------------------------------------------------------
 
-@router.get("/profile")
+@router.get("/profile", response_model=InternProfileOut)
 def get_my_profile(db: Session = Depends(get_db),
                     current_user=Depends(require_role("student"))):
-    intern = _get_own_intern(current_user, db)
-    mentor = db.query(Mentor).filter(Mentor.mentor_id == intern.mentor_id).first() if intern.mentor_id else None
-    return {
-        "intern_id": intern.intern_id,
-        "name": intern.name,
-        "email": intern.email,
-        "technology": intern.technology,
-        "batch": intern.batch,
-        "status": intern.status,
-        "start_date": intern.start_date,
-        "expected_end_date": intern.expected_end_date,
-        "mentor": {"mentor_id": mentor.mentor_id, "name": mentor.name, "technology": mentor.technology}
-        if mentor else None,
-    }
+    return _get_own_intern(current_user, db)
 
 
-@router.patch("/profile")
-def update_my_profile(payload: StudentProfileUpdate, db: Session = Depends(get_db),
+@router.patch("/profile", response_model=InternProfileOut)
+def update_my_profile(payload: InternProfileUpdate, db: Session = Depends(get_db),
                        current_user=Depends(require_role("student"))):
+    """Only the fields InternProfileUpdate defines (phone, education,
+    skills, bio, linkedin_url, github_url) are student-editable — name/
+    email/technology/batch stay admin-controlled by design."""
     intern = _get_own_intern(current_user, db)
     updates = payload.model_dump(exclude_unset=True)
-
-    if "email" in updates and updates["email"] != intern.email:
-        new_email = updates["email"]
-        if db.query(Intern).filter(Intern.email == new_email, Intern.intern_id != intern.intern_id).first() \
-                or db.query(Mentor).filter(Mentor.email == new_email).first():
-            raise HTTPException(status_code=409, detail="That email is already in use.")
-        # Keep the login record in sync - the User row is what /auth/login checks against.
-        current_user.email = new_email
-        db.add(current_user)
-
     for field, value in updates.items():
         setattr(intern, field, value)
-
     db.add(intern)
     db.commit()
     db.refresh(intern)
-    return {
-        "intern_id": intern.intern_id,
-        "name": intern.name,
-        "email": intern.email,
-        "technology": intern.technology,
-        "batch": intern.batch,
-        "status": intern.status,
-    }
+    return intern
 
 
 # --- Tasks --------------------------------------------------------------------
@@ -108,16 +85,108 @@ def update_my_task_status(task_id: int, payload: TaskStatusUpdate, db: Session =
     task = db.query(Task).filter(Task.task_id == task_id, Task.intern_id == intern.intern_id).first()
     if not task:
         raise HTTPException(status_code=404, detail="Task not found.")
-
     if payload.status not in ("pending", "in_progress", "completed", "late", "skipped"):
         raise HTTPException(status_code=422, detail="Invalid task status.")
-
     task.status = payload.status
     task.completed_date = date.today() if payload.status == "completed" else None
     db.add(task)
     db.commit()
     db.refresh(task)
     return task
+
+
+# --- Attendance: daily self check-in -------------------------------------------
+
+@router.post("/attendance/checkin", response_model=AttendanceOut)
+def check_in_today(db: Session = Depends(get_db),
+                    current_user=Depends(require_role("student"))):
+    """Marks the logged-in student present for today. Idempotent - if
+    today's row already exists it's just returned, not duplicated."""
+    intern = _get_own_intern(current_user, db)
+    today = date.today()
+    existing = (
+        db.query(Attendance)
+        .filter(Attendance.intern_id == intern.intern_id, Attendance.date == today)
+        .first()
+    )
+    if existing:
+        return existing
+    record = Attendance(intern_id=intern.intern_id, date=today, present=True)
+    db.add(record)
+    db.commit()
+    db.refresh(record)
+    return record
+
+
+@router.get("/attendance", response_model=list[AttendanceOut])
+def list_my_attendance(db: Session = Depends(get_db),
+                        current_user=Depends(require_role("student"))):
+    intern = _get_own_intern(current_user, db)
+    return (
+        db.query(Attendance)
+        .filter(Attendance.intern_id == intern.intern_id)
+        .order_by(Attendance.date.desc())
+        .limit(60)
+        .all()
+    )
+
+
+# --- Weekly reports --------------------------------------------------------------
+
+@router.get("/weekly-reports", response_model=list[WeeklyReportOut])
+def list_my_weekly_reports(db: Session = Depends(get_db),
+                            current_user=Depends(require_role("student"))):
+    intern = _get_own_intern(current_user, db)
+    return (
+        db.query(WeeklyReport)
+        .filter(WeeklyReport.intern_id == intern.intern_id)
+        .order_by(WeeklyReport.week_start_date.desc())
+        .all()
+    )
+
+
+@router.post("/weekly-reports", response_model=WeeklyReportOut)
+def submit_weekly_report(payload: WeeklyReportCreate, db: Session = Depends(get_db),
+                          current_user=Depends(require_role("student"))):
+    intern = _get_own_intern(current_user, db)
+    existing = (
+        db.query(WeeklyReport)
+        .filter(WeeklyReport.intern_id == intern.intern_id,
+                WeeklyReport.week_start_date == payload.week_start_date)
+        .first()
+    )
+    if existing:
+        raise HTTPException(status_code=409, detail="You've already submitted a report for that week.")
+    report = WeeklyReport(intern_id=intern.intern_id, **payload.model_dump())
+    db.add(report)
+    db.commit()
+    db.refresh(report)
+    return report
+
+
+# --- Project submissions ---------------------------------------------------------
+
+@router.get("/projects", response_model=list[ProjectSubmissionOut])
+def list_my_projects(db: Session = Depends(get_db),
+                      current_user=Depends(require_role("student"))):
+    intern = _get_own_intern(current_user, db)
+    return (
+        db.query(ProjectSubmission)
+        .filter(ProjectSubmission.intern_id == intern.intern_id)
+        .order_by(ProjectSubmission.submitted_at.desc())
+        .all()
+    )
+
+
+@router.post("/projects", response_model=ProjectSubmissionOut)
+def submit_project(payload: ProjectSubmissionCreate, db: Session = Depends(get_db),
+                    current_user=Depends(require_role("student"))):
+    intern = _get_own_intern(current_user, db)
+    submission = ProjectSubmission(intern_id=intern.intern_id, **payload.model_dump())
+    db.add(submission)
+    db.commit()
+    db.refresh(submission)
+    return submission
 
 
 # --- Dashboard overview ---------------------------------------------------------
@@ -128,7 +197,7 @@ def get_my_overview(db: Session = Depends(get_db),
     intern = _get_own_intern(current_user, db)
     mentor = db.query(Mentor).filter(Mentor.mentor_id == intern.mentor_id).first() if intern.mentor_id else None
 
-    # --- Latest prediction per type (same "most recent wins" logic as admin/mentor) ---
+    # --- Latest prediction per type ---
     preds = (
         db.query(Prediction)
         .filter(Prediction.intern_id == intern.intern_id)
@@ -157,6 +226,7 @@ def get_my_overview(db: Session = Depends(get_db),
     # --- Attendance ---
     attendance = db.query(Attendance).filter(Attendance.intern_id == intern.intern_id).all()
     attendance_rate = round(sum(1 for a in attendance if a.present) / len(attendance), 4) if attendance else None
+    marked_today = any(a.date == date.today() for a in attendance)
 
     # --- GitHub activity ---
     github = db.query(GithubActivity).filter(GithubActivity.intern_id == intern.intern_id).all()
@@ -192,6 +262,13 @@ def get_my_overview(db: Session = Depends(get_db),
             "status": intern.status,
             "start_date": intern.start_date,
             "expected_end_date": intern.expected_end_date,
+            "phone": intern.phone,
+            "education": intern.education,
+            "skills": intern.skills,
+            "bio": intern.bio,
+            "linkedin_url": intern.linkedin_url,
+            "github_url": intern.github_url,
+            "avatar_color": intern.avatar_color,
         },
         "mentor": {"name": mentor.name, "technology": mentor.technology} if mentor else None,
         "predictions": {
@@ -221,6 +298,9 @@ def get_my_overview(db: Session = Depends(get_db),
             ],
         },
         "attendance_rate": attendance_rate,
+        "attendance_marked_today": marked_today,
+        "weekly_reports_count": db.query(WeeklyReport).filter(WeeklyReport.intern_id == intern.intern_id).count(),
+        "projects_count": db.query(ProjectSubmission).filter(ProjectSubmission.intern_id == intern.intern_id).count(),
         "github": github_totals,
         "communication": comm_totals,
         "recommendations": [
