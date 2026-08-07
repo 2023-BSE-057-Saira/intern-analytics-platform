@@ -260,16 +260,9 @@ Full interactive reference (request/response schemas, try-it-out) is auto-genera
 
 ## 🖼️ Screenshots
 
-> 📷 *Add screenshots here once you have the app running — this is the single biggest thing missing from making this README "done."*
->
-> Suggested shots: **Admin overview**, **Mentor risk alerts**, **Student dashboard**, **Swagger `/docs` page**, one **SHAP explanation panel**.
->
-> ```markdown
-> | Admin Dashboard | Mentor Risk Alerts | Student View |
-> |---|---|---|
-> | ![Admin](docs/screenshots/admin.png) | ![Mentor](docs/screenshots/mentor.png) | ![Student](docs/screenshots/student.png) |
-> ```
-> Drop the images in a `docs/screenshots/` folder and this table renders automatically on GitHub.
+| Admin Dashboard | Mentor View | Student View |
+|---|---|---|
+| ![Admin](docs/screenshots/admin.png) | ![Mentor](docs/screenshots/mentor.png) | ![Student](docs/screenshots/student.png) |
 
 ---
 
