@@ -17,5 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Railway sets $PORT at runtime — don't hardcode 8000
-CMD uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}
+EXPOSE 8000
+
+# Fixed port instead of relying on $PORT resolving correctly at
+# container start - simpler and avoids Railway proxy port-mismatch
+# issues with dynamic ports in Dockerfile deploys.
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
