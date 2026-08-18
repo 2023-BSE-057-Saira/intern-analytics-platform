@@ -7,7 +7,7 @@ set -e
 # ---------------------------------------------------------------------------
 if [ ! -f "app/ml/saved_models/dropout_risk_xgb.json" ]; then
   echo ">> Extracting trained models from app/ml.zip ..."
-  unzip -o app/ml.zip -d app/ >/dev/null
+  unzip -o app/ml.zip "ml/saved_models/*" -d app/ >/dev/null
 else
   echo ">> Trained models already present, skipping unzip."
 fi
