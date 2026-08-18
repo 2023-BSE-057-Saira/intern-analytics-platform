@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 RUN echo "cache bust 1"
+RUN grep -n "def predict_learning_growth" app/ml/predict.py || (echo "FUNCTION MISSING - BUILD FAILING ON PURPOSE" && exit 1)
 RUN chmod +x entrypoint.sh
 
 EXPOSE 8000
